@@ -48,9 +48,13 @@ final class LedgerStore {
     }
     private JSONObject validateMemo(JSONObject input)throws Exception{
         String id=input.getString("id"),title=input.getString("title").trim(),body=input.getString("body");
-        if(!id.matches("[a-zA-Z0-9_-]{1,100}")||title.length()>100||body.length()>10000||(title.isEmpty()&&body.trim().isEmpty()))throw new Exception("备忘录需填写内容，标题最多 100 字，正文最多 10000 字");
-        return new JSONObject().put("id",id).put("title",title).put("body",body);
+        if(!id.matches("[a-zA-Z0-9_-]{1,100}")||title.length()>100||body.length()>10101||(title.isEmpty()&&body.trim().isEmpty()))throw new Exception("备忘录需填写内容，标题最多 100 字，正文最多 10101 字");
+        Object completed=input.opt("completedAt");long completedAt=input.optLong("completedAt",0);if(completedAt<0||completedAt>9007199254740991L||(completed!=null&&(!(completed instanceof Number)||((Number)completed).doubleValue()!=completedAt)))throw new Exception("完成时间无效");
+        Object rawSlot=input.opt("slot"),rawDone=input.opt("done");int slot=input.optInt("slot",-1);boolean done=input.optBoolean("done",false);String mark=input.optString("mark","");
+        if((rawSlot!=null&&(!(rawSlot instanceof Number)||((Number)rawSlot).doubleValue()!=slot))||slot < -1||slot>35||(rawDone!=null&&!(rawDone instanceof Boolean))||mark.codePointCount(0,mark.length())>1)throw new Exception("事项状态或象限位置无效");
+        return new JSONObject().put("id",id).put("title",title).put("body",body).put("done",done).put("slot",done?-1:slot).put("mark",mark).put("completedAt",done?completedAt:0);
     }
+    private int occupied(JSONArray memos,int slot,String id)throws Exception{if(slot<0)return -1;for(int i=0;i<memos.length();i++){JSONObject m=memos.getJSONObject(i);if(!m.getString("id").equals(id)&&!m.optBoolean("done")&&m.optInt("slot",-1)==slot)return i;}return -1;}
     String mutate(String action, String payload) {
         synchronized (LOCK) {
             try {
@@ -60,11 +64,13 @@ final class LedgerStore {
                     JSONArray incoming=bundle==null?new JSONArray(payload):bundle.getJSONArray("entries");if(incoming.length()>50000)throw new Exception("备份记录过多");
                     Set<String> ids=new HashSet<>();for(int i=0;i<entries.length();i++)ids.add(entries.getJSONObject(i).getString("id"));
                     for(int i=0;i<incoming.length();i++){JSONObject entry=validate(incoming.getJSONObject(i));if(ids.add(entry.getString("id"))&&exact(entries,entry)<0)entries.put(entry);}
-                    if(bundle!=null){JSONArray incomingMemos=bundle.getJSONArray("memos"),memos=state.getJSONArray("memos");if(incomingMemos.length()>1000)throw new Exception("备忘录过多");for(int i=0;i<incomingMemos.length();i++){JSONObject memo=validateMemo(incomingMemos.getJSONObject(i));if(find(memos,memo.getString("id"))<0)memos.put(memo);}}
+                    if(bundle!=null){JSONArray incomingMemos=bundle.getJSONArray("memos"),memos=state.getJSONArray("memos");if(incomingMemos.length()>1000)throw new Exception("备忘录过多");for(int i=0;i<incomingMemos.length();i++){JSONObject memo=validateMemo(incomingMemos.getJSONObject(i));if(find(memos,memo.getString("id"))<0){if(occupied(memos,memo.getInt("slot"),memo.getString("id"))>=0)memo.put("slot",-1);memos.put(memo);}}}
                 } else {
                     JSONObject data=new JSONObject(payload);
-                    if("saveMemo".equals(action)){
-                        JSONObject memo=validateMemo(data);JSONArray memos=state.getJSONArray("memos");int index=find(memos,memo.getString("id"));if(index<0)memos.put(memo);else memos.put(index,memo);
+                    if("moveMemo".equals(action)){
+                        JSONArray memos=state.getJSONArray("memos");int index=find(memos,data.getString("id"));if(index<0)throw new Exception("事项已删除");JSONObject memo=validateMemo(memos.getJSONObject(index));if(memo.getBoolean("done"))throw new Exception("请先恢复为未完成");memo.put("slot",data.get("slot"));memo=validateMemo(memo);if(occupied(memos,memo.getInt("slot"),memo.getString("id"))>=0)throw new Exception("该格已有事项，请选择空格");memos.put(index,memo);
+                    }else if("saveMemo".equals(action)){
+                        JSONObject memo=validateMemo(data);JSONArray memos=state.getJSONArray("memos");int index=find(memos,memo.getString("id"));if(occupied(memos,memo.getInt("slot"),memo.getString("id"))>=0)throw new Exception("该格已有事项，请选择空格");if(index<0)memos.put(memo);else memos.put(index,memo);
                     }else if("deleteMemo".equals(action)){JSONArray memos=state.getJSONArray("memos");int index=find(memos,data.getString("id"));if(index>=0)memos.remove(index);
                     }else if("upsert".equals(action)) {
                         JSONObject entry=validate(data);int index=find(entries,entry.getString("id"));

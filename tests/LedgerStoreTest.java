@@ -41,6 +41,18 @@ public final class LedgerStoreTest {
         check(!call(restored,"importBundle",invalid).getBoolean("ok"),"invalid memo prevents entire import");
         check(state(restored).getJSONArray("entries").length()==length,"combined import atomic");
         check(call(s,"deleteMemo",new JSONObject().put("id","m_test")).getBoolean("ok")&&state(new LedgerStore(m)).getJSONArray("memos").length()==0,"memo deletion persists");
+        LedgerStore matrix=new LedgerStore(new Memory());
+        for(int i=0;i<36;i++)check(call(matrix,"saveMemo",new JSONObject().put("id","q_"+i).put("title","").put("body","事项"+i).put("slot",i).put("mark","事")).getBoolean("ok"),"fill grid "+i);
+        check(!call(matrix,"moveMemo",new JSONObject().put("id","q_0").put("slot",1)).getBoolean("ok"),"occupied slot rejects without overwriting");
+        JSONObject completed=state(matrix).getJSONArray("memos").getJSONObject(1).put("done",true);call(matrix,"saveMemo",completed);
+        check(state(matrix).getJSONArray("memos").getJSONObject(1).getInt("slot")==-1,"completion releases slot");
+        check(call(matrix,"moveMemo",new JSONObject().put("id","q_0").put("slot",1)).getBoolean("ok"),"move into freed slot");
+        check(!call(matrix,"moveMemo",new JSONObject().put("id","q_1").put("slot",0)).getBoolean("ok"),"completed task cannot occupy slot");
+        check(!call(matrix,"moveMemo",new JSONObject().put("id","q_0").put("slot",36)).getBoolean("ok"),"slot range enforced");
+        JSONObject mb=new JSONObject(matrix.exportBackup());LedgerStore roundtrip=new LedgerStore(new Memory());call(roundtrip,"importBundle",mb);
+        check(state(roundtrip).getJSONArray("memos").getJSONObject(0).getInt("slot")==1&&state(roundtrip).getJSONArray("memos").getJSONObject(1).getBoolean("done"),"matrix and completed state survive backup");
+        JSONObject conflict=new JSONObject().put("entries",new JSONArray()).put("memos",new JSONArray().put(new JSONObject().put("id","extra").put("title","").put("body","额外事项").put("slot",1)));
+        check(call(roundtrip,"importBundle",conflict).getBoolean("ok")&&state(roundtrip).getJSONArray("memos").getJSONObject(36).getInt("slot")==-1,"backup slot conflict keeps incoming task unassigned");
         System.out.println("Ledger storage: "+checks+" checks passed");
     }
 }

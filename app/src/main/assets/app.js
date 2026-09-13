@@ -23,8 +23,9 @@ function transact(action, payload) {
   if(action==='editCandidate'){const i=next.pending.findIndex(p=>p.id===payload.id);if(i>=0)next.pending[i]={...next.pending[i],...C.validateEntry(payload.entry)};}
   if(action==='confirm') {next.entries.push(C.validateEntry(payload.entry));next.pending=next.pending.filter(e=>e.id!==payload.id);}
   if(action==='dismiss') next.pending=next.pending.filter(e=>e.id!==payload.id);
-  if(action==='importBundle'){for(const m of payload.memos){if(!next.memos.some(x=>x.id===m.id))next.memos.push(C.validateMemo(m));}}
-  if(action==='saveMemo'){const memo=C.validateMemo(payload),i=next.memos.findIndex(m=>m.id===memo.id);if(i<0)next.memos.push(memo);else next.memos[i]=memo;}
+  if(action==='importBundle'){for(const m of payload.memos){if(!next.memos.some(x=>x.id===m.id)){const incoming=C.validateMemo(m);if(next.memos.some(x=>x.slot>=0&&x.slot===incoming.slot&&!x.done))incoming.slot=-1;next.memos.push(incoming);}}}
+  if(action==='saveMemo'){const memo=C.validateMemo(payload),i=next.memos.findIndex(m=>m.id===memo.id);if(memo.slot>=0&&next.memos.some(m=>m.id!==memo.id&&!m.done&&m.slot===memo.slot))throw new Error('该格已有事项，请选择空格');if(i<0)next.memos.push(memo);else next.memos[i]=memo;}
+  if(action==='moveMemo')next.memos=C.moveMemo(next.memos,payload.id,payload.slot);
   if(action==='deleteMemo')next.memos=next.memos.filter(m=>m.id!==payload.id);
   if(next.memos.length>1000)throw new Error('最多保存 1000 条备忘录');
   localStorage.setItem('daily-ledger-v1',JSON.stringify(next));state=next;return {ok:true};
@@ -59,8 +60,18 @@ function statsPage(){
   const entries=C.monthEntries(state.entries,month), items=chartMode==='week'?C.weeks(entries,month):C.annual(state.entries,month.slice(0,4));
   return `<section class="card" id="spending-chart"><div class="section-heading"><div><h2>${chartMode==='week'?'每周花销':month.slice(0,4)+' 年每月花销'}</h2><p>金额单位：元</p></div><div class="segmented" aria-label="统计维度"><button data-mode="week" class="${chartMode==='week'?'active':''}">周总</button><button data-mode="month" class="${chartMode==='month'?'active':''}">月总</button></div></div>${chartHTML(items,chartMode==='month')}<p class="calendar-note">${chartMode==='week'?'每周一开始；跨月周只计所选月份内的支出。点击柱子查看明细。':'点击月份柱子，查看该月的周统计。'}</p></section>${chartMode==='month'?`<section class="card"><div class="section-heading"><h2>月支出汇总</h2><span class="subtle">${month.slice(0,4)} 年</span></div>${items.map(e=>`<button class="row wide" data-month="${e.month}"><span>${e.label}</span><strong>¥${fmt(e.cents)} ›</strong></button>`).join('')}</section>`:''}`;
 }
-function memosPage(){return `<div class="page-heading"><h2>备忘录</h2><button class="primary compact" data-new-memo>＋ 新建</button></div><p class="subtle">随手记下要办的事 · ${state.memos.length} 条</p>${state.memos.length?state.memos.slice().reverse().map(m=>`<article class="card memo-card"><button class="memo-open wide" data-edit-memo="${escapeHTML(m.id)}"><h3>${escapeHTML(m.title||'未命名备忘录')}</h3><p>${escapeHTML(m.body)}</p></button><div class="transaction-actions"><button class="text-button" data-edit-memo="${escapeHTML(m.id)}">编辑</button><button class="text-button delete" data-delete-memo="${escapeHTML(m.id)}">删除</button></div></article>`).join(''):emptyHTML('还没有备忘录，点击新建记录一下吧',false)}`;}
-function openMemo(id){const m=state.memos.find(m=>m.id===id);$('memo-id').value=m?.id||'m_'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'_'+Math.random().toString(36).slice(2));$('memo-title').value=m?.title||'';$('memo-body').value=m?.body||'';$('memo-error').textContent='';$('memo-dialog').showModal();}
+let memoView='list',pendingSlot=-1;
+const quadrantNames=['重要且紧急','重要不紧急','紧急不重要','不紧急不重要'];
+const memoMark=m=>m.mark||Array.from(C.memoText(m).trim())[0]||'事';
+function memoRow(m){return `<div class="todo-row ${m.done?'completed':''}"><button class="todo-check" data-toggle-memo="${escapeHTML(m.id)}" aria-label="${m.done?'恢复':'完成'}：${escapeHTML(C.memoText(m))}" aria-pressed="${m.done}">${m.done?'✓':''}</button><button class="todo-text" data-edit-memo="${escapeHTML(m.id)}">${escapeHTML(C.memoText(m))}</button>${m.slot>=0?`<span class="todo-tag q${Math.floor(m.slot/9)}">${escapeHTML(memoMark(m))}</span>`:''}${!m.done&&memoView==='matrix'?`<button class="drag-handle" data-drag-memo="${escapeHTML(m.id)}" aria-label="拖动事项">⠿</button>`:''}</div>`;}
+function memosPage(){
+ const active=state.memos.filter(m=>!m.done),done=state.memos.filter(m=>m.done).sort((a,b)=>a.completedAt-b.completedAt);
+ const board=`<div class="quadrant-board">${quadrantNames.map((name,q)=>`<section class="quadrant q${q}"><h3>${name}<small>${active.filter(m=>Math.floor(m.slot/9)===q).length}/9</small></h3><div class="quadrant-grid">${Array.from({length:9},(_,i)=>{const slot=q*9+i,m=active.find(m=>m.slot===slot);return `<button class="quadrant-cell ${m?'filled':''}" data-slot="${slot}" ${m?`data-drag-memo="${escapeHTML(m.id)}"`:''} aria-label="${name} 第${i+1}格：${m?escapeHTML(C.memoText(m)):'空格，添加事项'}">${m?`<strong>${escapeHTML(memoMark(m))}</strong><small>${escapeHTML(C.memoText(m).replace(/\s/g,'').slice(0,4))}</small>`:'＋'}</button>`;}).join('')}</div></section>`).join('')}</div>`;
+ return `<div class="page-heading"><h2>待办事项</h2><button class="primary compact" data-new-memo>＋ 添加</button></div><div class="memo-toolbar"><span class="subtle">${active.length} 件待办 · ${done.length} 件完成</span><div class="segmented"><button data-memo-view="list" class="${memoView==='list'?'active':''}">清单</button><button data-memo-view="matrix" class="${memoView==='matrix'?'active':''}">四象限</button></div></div>${memoView==='matrix'?board+'<p class="subtle matrix-help">拖动 ⠿ 或方块放入空格；点空格也能选择事项。</p>':''}<section class="todo-paper ${memoView==='matrix'?'task-tray':''}"><h3>${memoView==='matrix'?'事项清单':'未完成'}</h3>${active.length?active.map(memoRow).join(''):emptyHTML('暂时没有待办，添加一句话就好',false)}${done.length?`<h3 class="done-heading">已完成 · ${done.length}</h3>${done.map(memoRow).join('')}`:''}</section>`;
+}
+function openMemo(id,slot=-1){const m=state.memos.find(m=>m.id===id);pendingSlot=m?.slot??slot;$('memo-id').value=m?.id||'m_'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'_'+Math.random().toString(36).slice(2));$('memo-body').value=m?C.memoText(m):'';$('memo-mark').value=m?.mark||'';$('memo-options').hidden=!m;$('memo-position').textContent=m?.slot>=0?quadrantNames[Math.floor(m.slot/9)]+' · 第 '+(m.slot%9+1)+' 格':'未放入象限';$('memo-unassign').hidden=!(m?.slot>=0);$('memo-remove').hidden=!m;$('memo-error').textContent='';$('memo-dialog').showModal();}
+function chooseMemoSlot(slot){pendingSlot=slot;const m=state.memos.find(m=>!m.done&&m.slot===slot);if(m){openMemo(m.id);return;}$('memo-picker-content').innerHTML=state.memos.filter(m=>!m.done).map(m=>`<button class="pick-task" data-pick-memo="${escapeHTML(m.id)}">${escapeHTML(C.memoText(m))}${m.slot>=0?'<small>已在 '+quadrantNames[Math.floor(m.slot/9)]+'</small>':''}</button>`).join('')||'<p class="subtle">还没有待办事项</p>';$('memo-picker').showModal();}
+function moveTask(id,slot){transact('moveMemo',{id,slot});render();toast(slot<0?'已移出象限':'已放入'+quadrantNames[Math.floor(slot/9)]);}
 
 function settingsPage(){
   const scanner=native?JSON.parse(AndroidLedger.scannerStatus()):{};
@@ -73,7 +84,7 @@ function settingsPage(){
   <section class="card" id="scan-queue"><div class="section-heading"><h2>扫描结果</h2><span class="pill">${state.pending.length} 笔待核对</span></div>
   ${fresh.length&&native?`<button id="confirm-scans" class="primary wide">核对全部 ${fresh.length} 笔新记录 · ¥${fmt(C.sum(fresh))}</button>`:''}
   ${state.pending.length?state.pending.map(p=>`<article class="pending-card"><div class="row"><span>${channels[p.channel]}<small>${escapeHTML(p.date)} ${escapeHTML(p.time)}</small></span><strong>¥${fmt(p.cents)}</strong></div><p>${escapeHTML(p.note)}</p>${p.duplicateStatus==='possible'?`<div class="notice warning">疑似重复，请先比较已有记录。<label class="checkbox-label"><input type="checkbox" data-force-id="${escapeHTML(p.id)}">这是另一笔消费，仍然入账</label></div>`:''}<div class="button-row"><button class="secondary" data-dismiss="${escapeHTML(p.id)}">忽略</button><button class="secondary" data-edit-scan="${escapeHTML(p.id)}">编辑</button><button class="primary" data-accept="${escapeHTML(p.id)}">核对</button></div></article>`).join(''):emptyHTML('暂无待核对记录',false)}</section>
-  <section class="card"><div class="section-heading"><h2>账本备份</h2><span class="subtle">${state.entries.length} 笔记录</span></div><p class="settings-copy">升级前先备份，直接覆盖安装即可保留账本。备份包含账单和备忘录，导入会核对已有编号和扫描来源。</p><div class="button-row"><button class="secondary" id="export">导出备份</button><button class="secondary" id="import">导入备份</button></div><input type="file" class="import-input" id="import-file" accept="application/json,.json"></section><p class="subtle" style="text-align:center">日常账本 1.4 · 本机保存</p>`;
+  <section class="card"><div class="section-heading"><h2>账本备份</h2><span class="subtle">${state.entries.length} 笔记录</span></div><p class="settings-copy">升级前先备份，直接覆盖安装即可保留账本。备份包含账单和备忘录，导入会核对已有编号和扫描来源。</p><div class="button-row"><button class="secondary" id="export">导出备份</button><button class="secondary" id="import">导入备份</button></div><input type="file" class="import-input" id="import-file" accept="application/json,.json"></section><p class="subtle" style="text-align:center">日常账本 1.5 · 本机保存</p>`;
 }
 function fitDayAmounts(){
   const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');if(!ctx)return;
@@ -114,13 +125,18 @@ window.nativeNotice=toast;
 window.refreshLedger=()=>{refresh();render();if($('day-dialog').open){$('day-dialog').close();}};
 window.openScanQueue=()=>{page='settings';refresh();render();$('scan-queue')?.scrollIntoView({behavior:'smooth'});return true;};
 document.addEventListener('click',e=>{
-  const b=e.target.closest('button');if(!b)return;
+  const b=e.target.closest('button');if(!b)return;if(Date.now()<suppressMemoClick)return;
   try{
     if(b.dataset.page){page=b.dataset.page;refresh();render();window.scrollTo(0,0);}
     if(b.dataset.shift){const d=C.parseDate(month+'-01');d.setMonth(d.getMonth()+Number(b.dataset.shift));const next=C.dateKey(d).slice(0,7);if(next>='2000-01'&&next<='2099-12'){month=next;render();}}
     if(b.dataset.mode){chartMode=b.dataset.mode;render();$('spending-chart').scrollIntoView({block:'start'});}
     if(b.dataset.month){month=b.dataset.month;chartMode='week';render();$('spending-chart').scrollIntoView({block:'start'});}
+    if(b.dataset.memoView){memoView=b.dataset.memoView;render();}
     if(b.hasAttribute('data-new-memo'))openMemo();
+    if(b.hasAttribute('data-slot'))chooseMemoSlot(Number(b.dataset.slot));
+    if(b.dataset.pickMemo){moveTask(b.dataset.pickMemo,pendingSlot);$('memo-picker').close();}
+    if(b.dataset.toggleMemo){const m=state.memos.find(m=>m.id===b.dataset.toggleMemo);if(m){transact('saveMemo',{...m,done:!m.done,completedAt:m.done?0:Date.now(),slot:-1});render();}}
+
     if(b.dataset.editMemo)openMemo(b.dataset.editMemo);
     if(b.dataset.deleteMemo)ask('删除这条备忘录？','删除后无法恢复。',()=>{transact('deleteMemo',{id:b.dataset.deleteMemo});render();toast('已删除备忘录');});
     if(b.dataset.week)openWeek(b.dataset.week);
@@ -146,8 +162,17 @@ $('confirm-ok').addEventListener('click',()=>{const action=confirmAction;confirm
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();render();}});
 refresh();render();
 
-$('memo-form').addEventListener('submit',e=>{e.preventDefault();try{transact('saveMemo',{id:$('memo-id').value,title:$('memo-title').value,body:$('memo-body').value});$('memo-dialog').close();render();toast('备忘录已保存');}catch(error){$('memo-error').textContent=error.message;}});
+$('memo-form').addEventListener('submit',e=>{e.preventDefault();try{const old=state.memos.find(m=>m.id===$('memo-id').value);transact('saveMemo',{id:$('memo-id').value,title:'',body:$('memo-body').value.trim(),done:old?.done||false,completedAt:old?.completedAt||0,slot:pendingSlot,mark:$('memo-mark').value.trim()});$('memo-dialog').close();render();toast('事项已保存');}catch(error){$('memo-error').textContent=error.message;}});
+$('memo-unassign').addEventListener('click',()=>{pendingSlot=-1;$('memo-position').textContent='保存后移出象限';$('memo-unassign').hidden=true;});
+$('memo-remove').addEventListener('click',()=>{const id=$('memo-id').value;ask('删除这件事项？','删除后无法恢复。',()=>{transact('deleteMemo',{id});$('memo-dialog').close();render();toast('已删除事项');});});
+$('picker-new').addEventListener('click',()=>{$('memo-picker').close();openMemo(undefined,pendingSlot);});
 let dayBackdrop=false;
 const outsideDay=e=>{const r=$('day-dialog').getBoundingClientRect();return e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom;};
 $('day-dialog').addEventListener('pointerdown',e=>{dayBackdrop=e.target===$('day-dialog')&&outsideDay(e);});
 $('day-dialog').addEventListener('click',e=>{if(dayBackdrop&&e.target===$('day-dialog')&&outsideDay(e))$('day-dialog').close();dayBackdrop=false;});
+
+let memoDrag=null,suppressMemoClick=0;
+document.addEventListener('pointerdown',e=>{const h=e.target.closest('[data-drag-memo]');if(!h||e.button!==0)return;memoDrag={id:h.dataset.dragMemo,x:e.clientX,y:e.clientY,handle:h,pointer:e.pointerId,moved:false};h.setPointerCapture(e.pointerId);});
+document.addEventListener('pointermove',e=>{if(!memoDrag||memoDrag.pointer!==e.pointerId)return;const d=memoDrag;if(!d.moved&&Math.hypot(e.clientX-d.x,e.clientY-d.y)<7)return;d.moved=true;e.preventDefault();if(!d.ghost){d.ghost=document.createElement('div');d.ghost.className='memo-drag-ghost';d.ghost.textContent=memoMark(state.memos.find(m=>m.id===d.id));document.body.appendChild(d.ghost);}d.ghost.style.left=e.clientX+'px';d.ghost.style.top=e.clientY+'px';document.querySelectorAll('.drop-target').forEach(x=>x.classList.remove('drop-target'));const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-slot]');target?.classList.add('drop-target');});
+function endMemoDrag(e,cancel=false){if(!memoDrag||memoDrag.pointer!==e.pointerId)return;const d=memoDrag;memoDrag=null;d.ghost?.remove();document.querySelectorAll('.drop-target').forEach(x=>x.classList.remove('drop-target'));if(d.handle.hasPointerCapture(e.pointerId))d.handle.releasePointerCapture(e.pointerId);if(!d.moved)return;suppressMemoClick=Date.now()+400;if(cancel)return;const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-slot]');if(target)try{moveTask(d.id,Number(target.dataset.slot));}catch(error){toast(error.message);}}
+document.addEventListener('pointerup',e=>endMemoDrag(e));document.addEventListener('pointercancel',e=>endMemoDrag(e,true));

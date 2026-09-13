@@ -54,10 +54,18 @@
     return entries;
   }
   function validateMemo(m){
-    if(!m||typeof m.id!=='string'||!/^[a-zA-Z0-9_-]{1,100}$/.test(m.id)||typeof m.title!=='string'||typeof m.body!=='string'||m.title.trim().length>100||m.body.length>10000||(!m.title.trim()&&!m.body.trim()))throw new Error('备忘录需填写内容，标题最多 100 字，正文最多 10000 字');
-    return {id:m.id,title:m.title.trim(),body:m.body};
+    if(!m||typeof m.id!=='string'||!/^[a-zA-Z0-9_-]{1,100}$/.test(m.id)||typeof m.title!=='string'||typeof m.body!=='string'||m.title.trim().length>100||m.body.length>10101||(!m.title.trim()&&!m.body.trim()))throw new Error('备忘录需填写内容，标题最多 100 字，正文最多 10101 字');
+    const done=m.done??false,slot=m.slot??-1,mark=m.mark??'',completedAt=m.completedAt??0;
+    if(!Number.isSafeInteger(completedAt)||completedAt<0||typeof done!=='boolean'||!Number.isInteger(slot)||slot < -1||slot>35||typeof mark!=='string'||Array.from(mark).length>1)throw new Error('事项状态或象限位置无效');
+    return {id:m.id,title:m.title.trim(),body:m.body,done,slot:done?-1:slot,mark,completedAt:done?completedAt:0};
+  }
+  const memoText=m=>[m.title,m.body].filter(Boolean).join('\n');
+  function moveMemo(memos,id,slot){
+    if(!Number.isInteger(slot)||slot < -1||slot>35)throw new Error('象限位置无效');
+    const next=memos.map(validateMemo),m=next.find(m=>m.id===id);if(!m)throw new Error('事项已删除');if(m.done)throw new Error('请先恢复为未完成');
+    const occupied=next.find(x=>x.id!==id&&x.slot===slot&&slot>=0);if(occupied)throw new Error('该格已有事项，请选择空格');m.slot=slot;return next;
   }
   function parseBackupMemos(text){const data=JSON.parse(text),memos=data.memos??[];if(!Array.isArray(memos)||memos.length>1000)throw new Error('备忘录备份无效');const result=memos.map(validateMemo);if(new Set(result.map(m=>m.id)).size!==result.length)throw new Error('备忘录编号重复');return result;}
-  root.LedgerCore={pad,dateKey,parseDate,money,toCents,validateEntry,sum,monthEntries,monthDays,weeks,annual,parseBackup,validateMemo,parseBackupMemos};
+  root.LedgerCore={pad,dateKey,parseDate,money,toCents,validateEntry,sum,monthEntries,monthDays,weeks,annual,parseBackup,validateMemo,parseBackupMemos,memoText,moveMemo};
   if(typeof module!=='undefined') module.exports=root.LedgerCore;
 })(typeof window==='undefined'?globalThis:window);

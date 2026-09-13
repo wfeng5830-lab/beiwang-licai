@@ -46,9 +46,23 @@ test('scan identity survives validation and backup, while legacy booked entries 
 
 test('memo backup retains multiline text and accepts old expense-only backups',()=>{
   const m={id:'m_test',title:'购物清单',body:'牛奶\n面包'};
-  assert.deepEqual(C.parseBackupMemos(JSON.stringify({version:1,entries:[],memos:[m]})),[m]);
+  assert.deepEqual(C.parseBackupMemos(JSON.stringify({version:1,entries:[],memos:[m]})),[C.validateMemo(m)]);
   assert.deepEqual(C.parseBackupMemos(JSON.stringify({version:1,entries:[]})),[]);
   assert.throws(()=>C.validateMemo({id:'m',title:' ',body:' '}));
   assert.throws(()=>C.parseBackupMemos(JSON.stringify({memos:[m,m]})));
-  assert.throws(()=>C.validateMemo({...m,body:'a'.repeat(10001)}));
+  assert.throws(()=>C.validateMemo({...m,body:'a'.repeat(10102)}));
+});
+
+test('quadrants support 36 distinct slots, reject collisions, and completion releases slots',()=>{
+ const tasks=Array.from({length:36},(_,i)=>C.validateMemo({id:'m_'+i,title:'',body:'事项'+i,slot:i}));
+ assert.equal(new Set(tasks.map(m=>m.slot)).size,36);
+ assert.throws(()=>C.moveMemo(tasks,'m_0',9));
+ const moved=C.moveMemo(C.moveMemo(tasks,'m_9',-1),'m_0',9);
+ assert.equal(moved[0].slot,9);assert.equal(tasks[0].slot,0);
+ assert.equal(C.validateMemo({...tasks[0],done:true}).slot,-1);
+ assert.throws(()=>C.moveMemo([{...tasks[0],done:true}],'m_0',1));
+ assert.throws(()=>C.moveMemo(tasks,'m_0',36));
+ const legacy=C.validateMemo({id:'old',title:'原标题',body:'原内容\n第二行'});
+ assert.equal(C.memoText(legacy),'原标题\n原内容\n第二行');assert.equal(legacy.done,false);assert.equal(legacy.slot,-1);
+ const m=C.validateMemo({...legacy,mark:'药',slot:22});assert.deepEqual(C.parseBackupMemos(JSON.stringify({memos:[m]})),[m]);
 });
