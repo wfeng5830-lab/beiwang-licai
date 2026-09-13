@@ -1,0 +1,22 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'cn.dailyledger.app'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'cn.dailyledger.app'
+        minSdk 26
+        targetSdk 35
+        versionCode 5
+        versionName '1.4.0'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Bundled Chinese OCR: works locally without Google Play model downloads.
+    implementation 'com.google.mlkit:text-recognition-chinese:16.0.1'
+}

@@ -1,0 +1,17 @@
+.tools/
+.gradle/
+**/build/
+local.properties
+*.jks
+*.keystore
+
+node_modules/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+private-data/
+*.log
+.DS_Store
+Thumbs.db

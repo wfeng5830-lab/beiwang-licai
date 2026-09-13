@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#176a59">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>日常账本</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="core.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar"><div class="brand"><span class="brand-icon" aria-hidden="true">▥</span><div><h1>日常账本</h1><span class="subtle">每一笔，都有数</span></div></div><button id="add-top" class="primary compact">＋ 记一笔</button></header>
+  <main id="main"></main>
+  <nav class="bottom-nav" aria-label="主导航">
+    <button data-page="memos"><span aria-hidden="true">▤</span>备忘录</button>
+    <button data-page="calendar" class="active"><span aria-hidden="true">▦</span>账单花销</button>
+    <button data-page="settings"><span aria-hidden="true">☷</span>设置</button>
+  </nav>
+</div>
+<dialog id="entry-dialog"><form id="entry-form">
+  <div class="dialog-heading"><h2 id="entry-title">记一笔支出</h2><button type="button" class="icon-button" data-close="entry-dialog" aria-label="关闭">×</button></div>
+  <input type="hidden" id="entry-id">
+  <label class="amount-label" for="amount">消费金额（元）</label><div class="amount-input"><span>¥</span><input id="amount" inputmode="decimal" placeholder="0.00" required autocomplete="off" maxlength="12"></div>
+  <div class="form-grid"><label>消费日期<input type="date" id="date" required min="2000-01-01" max="2099-12-31"></label><label>时间<input type="time" id="time" required></label></div>
+  <label>支付方式<select id="channel"><option value="wechat">微信支付</option><option value="alipay">支付宝</option><option value="other">其他</option></select></label>
+  <label>分类<select id="category"><option>餐饮</option><option>购物</option><option>交通</option><option>生活缴费</option><option>娱乐</option><option>医疗</option><option>其他</option></select></label>
+  <label>商户 / 备注<input id="note" placeholder="例如：午餐、超市购物" maxlength="80"></label>
+  <div id="duplicate-review" class="notice warning" hidden><p id="duplicate-copy"></p><label class="checkbox-label"><input id="force-duplicate" type="checkbox">我已核对，这是另一笔真实消费，仍然入账</label></div>
+  <p id="form-error" class="error" role="alert"></p><button class="primary wide" type="submit">保存支出</button>
+</form></dialog>
+<dialog id="day-dialog"><div class="dialog-heading"><h2 id="day-title"></h2><button class="icon-button" data-close="day-dialog" aria-label="关闭">×</button></div><div id="day-summary"></div><div id="day-content"></div></dialog>
+<dialog id="memo-dialog"><form id="memo-form"><div class="dialog-heading"><h2>备忘录</h2><button type="button" class="icon-button" data-close="memo-dialog" aria-label="关闭">×</button></div><input type="hidden" id="memo-id"><label>标题<input id="memo-title" maxlength="100" placeholder="给这条备忘录起个标题"></label><label>内容<textarea id="memo-body" maxlength="10000" rows="10" placeholder="记下要办的事、购物清单……"></textarea></label><p id="memo-error" class="error" role="alert"></p><button class="primary wide" type="submit">保存备忘录</button></form></dialog>
+<dialog id="confirm-dialog"><h2 id="confirm-title">确认删除？</h2><p id="confirm-copy"></p><div class="button-row"><button id="confirm-cancel" class="secondary">取消</button><button id="confirm-ok" class="primary">确认</button></div></dialog>
+<div id="toast" role="status" class="toast" hidden></div>
+</body></html>
