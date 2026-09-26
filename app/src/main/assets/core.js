@@ -60,12 +60,13 @@
     return {id:m.id,title:m.title.trim(),body:m.body,done,slot:done?-1:slot,mark,completedAt:done?completedAt:0};
   }
   const memoText=m=>[m.title,m.body].filter(Boolean).join('\n');
+  const launcherDestination=memos=>memos.some(m=>!m.done&&Number.isInteger(m.slot)&&m.slot>=0&&m.slot<9)?'matrix':'calendar';
   function moveMemo(memos,id,slot){
     if(!Number.isInteger(slot)||slot < -1||slot>35)throw new Error('象限位置无效');
     const next=memos.map(validateMemo),m=next.find(m=>m.id===id);if(!m)throw new Error('事项已删除');if(m.done)throw new Error('请先恢复为未完成');
     const occupied=next.find(x=>x.id!==id&&x.slot===slot&&slot>=0);if(occupied)throw new Error('该格已有事项，请选择空格');m.slot=slot;return next;
   }
   function parseBackupMemos(text){const data=JSON.parse(text),memos=data.memos??[];if(!Array.isArray(memos)||memos.length>1000)throw new Error('备忘录备份无效');const result=memos.map(validateMemo);if(new Set(result.map(m=>m.id)).size!==result.length)throw new Error('备忘录编号重复');return result;}
-  root.LedgerCore={pad,dateKey,parseDate,money,toCents,validateEntry,sum,monthEntries,monthDays,weeks,annual,parseBackup,validateMemo,parseBackupMemos,memoText,moveMemo};
+  root.LedgerCore={pad,dateKey,parseDate,money,toCents,validateEntry,sum,monthEntries,monthDays,weeks,annual,parseBackup,validateMemo,parseBackupMemos,memoText,moveMemo,launcherDestination};
   if(typeof module!=='undefined') module.exports=root.LedgerCore;
 })(typeof window==='undefined'?globalThis:window);

@@ -1,6 +1,18 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const C=require('../app/src/main/assets/core.js');
+test('launcher opens quadrants only for unfinished important-and-urgent tasks',()=>{
+  assert.equal(C.launcherDestination([]),'calendar');
+  for(const slot of [0,4,8])assert.equal(C.launcherDestination([{slot,done:false}]),'matrix');
+  for(const slot of [-1,9,17,18,26,27,35])assert.equal(C.launcherDestination([{slot,done:false}]),'calendar');
+  assert.equal(C.launcherDestination([{slot:0,done:true},{slot:9,done:false}]),'calendar');
+  assert.equal(C.launcherDestination([{slot:35,done:false},{slot:8,done:false}]),'matrix');
+  const task=C.validateMemo({id:'urgent',title:'',body:'交电费',slot:0});
+  assert.equal(C.launcherDestination([task]),'matrix');
+  assert.equal(C.launcherDestination(C.moveMemo([task],'urgent',9)),'calendar');
+  assert.equal(C.launcherDestination([C.validateMemo({...task,done:true})]),'calendar');
+  assert.equal(C.launcherDestination([C.validateMemo({id:'legacy',title:'旧事项',body:''})]),'calendar');
+});
 const entry=(id,date,cents)=>({id,date,cents,time:'12:30',channel:'wechat',category:'餐饮',note:'午餐',source:'manual'});
 test('decimal money is converted to integer cents without floating point loss',()=>{
   assert.equal(C.toCents('0.29'),29);assert.equal(C.toCents('12.3'),1230);

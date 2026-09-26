@@ -75,8 +75,13 @@ function moveTask(id,slot){transact('moveMemo',{id,slot});render();toast(slot<0?
 
 function settingsPage(){
   const scanner=native?JSON.parse(AndroidLedger.scannerStatus()):{};
+  const desktop=native?JSON.parse(AndroidLedger.desktopIconStatus()):{};
   const fresh=state.pending.filter(p=>p.duplicateStatus!=='possible');
   return `<div class="page-heading"><h2>设置</h2><span class="pill">仅存本机</span></div>
+  <section class="card"><div class="section-heading"><h2>桌面四象限图标</h2><span class="pill">${desktop.pinned?'已添加':'未添加'}</span></div>
+  <p class="settings-copy">每个象限只有一件待办时显示一个大字，多件时显示四小格；按格子顺序展示前四件，剩余数量用 + 标注。全部清空后恢复默认图案。</p>
+  <p class="settings-copy">只有“重要且紧急”象限有未完成事项，点击图标才进入四象限；其他情况打开账单花销。</p>
+  ${native?`<p class="subtle" role="status">${escapeHTML(desktop.message)}</p>${desktop.supported||desktop.pinned?`<div class="button-row">${desktop.pinned?'<button class="secondary" id="refresh-desktop-icon">刷新图标</button>':'<button class="primary" id="add-desktop-icon">添加到桌面</button>'}</div>`:'<p class="settings-copy">当前桌面不支持添加快捷图标。</p>'}<p class="settings-copy">首次需在系统弹窗确认。这是新增快捷图标，原应用图标保留；可手动从桌面移走旧图标，无需卸载。系统可能附带小应用标记，显示样式与刷新速度由手机桌面决定。</p>`:'<p class="settings-copy">安装安卓应用后，可在这里添加桌面快捷图标。</p>'}</section>
   <section class="card"><div class="section-heading"><h2>悬浮扫描</h2><span class="pill">${scanner.connected?'扫描已开启':'未开启'}</span></div>
   <p class="settings-copy">无需无障碍服务。允许悬浮窗后，开启扫描并确认系统屏幕共享授权，再切到微信或支付宝账单页，点悬浮窗“扫描”，自动识别微信或支付宝，无需切换。</p>
   ${native?`<div class="form-grid"><label>账单月份<input type="month" id="scan-month" min="2000-01" max="2099-12" value="${escapeHTML(scanner.month||month)}"></label></div><p class="subtle">月份用于没有年份的历史账单。“今天 / 昨天”按手机当前日期识别。</p>
@@ -84,7 +89,7 @@ function settingsPage(){
   <section class="card" id="scan-queue"><div class="section-heading"><h2>扫描结果</h2><span class="pill">${state.pending.length} 笔待核对</span></div>
   ${fresh.length&&native?`<button id="confirm-scans" class="primary wide">核对全部 ${fresh.length} 笔新记录 · ¥${fmt(C.sum(fresh))}</button>`:''}
   ${state.pending.length?state.pending.map(p=>`<article class="pending-card"><div class="row"><span>${channels[p.channel]}<small>${escapeHTML(p.date)} ${escapeHTML(p.time)}</small></span><strong>¥${fmt(p.cents)}</strong></div><p>${escapeHTML(p.note)}</p>${p.duplicateStatus==='possible'?`<div class="notice warning">疑似重复，请先比较已有记录。<label class="checkbox-label"><input type="checkbox" data-force-id="${escapeHTML(p.id)}">这是另一笔消费，仍然入账</label></div>`:''}<div class="button-row"><button class="secondary" data-dismiss="${escapeHTML(p.id)}">忽略</button><button class="secondary" data-edit-scan="${escapeHTML(p.id)}">编辑</button><button class="primary" data-accept="${escapeHTML(p.id)}">核对</button></div></article>`).join(''):emptyHTML('暂无待核对记录',false)}</section>
-  <section class="card"><div class="section-heading"><h2>账本备份</h2><span class="subtle">${state.entries.length} 笔记录</span></div><p class="settings-copy">升级前先备份，直接覆盖安装即可保留账本。备份包含账单和备忘录，导入会核对已有编号和扫描来源。</p><div class="button-row"><button class="secondary" id="export">导出备份</button><button class="secondary" id="import">导入备份</button></div><input type="file" class="import-input" id="import-file" accept="application/json,.json"></section><p class="subtle" style="text-align:center">日常账本 1.5 · 本机保存</p>`;
+  <section class="card"><div class="section-heading"><h2>账本备份</h2><span class="subtle">${state.entries.length} 笔记录</span></div><p class="settings-copy">升级前先备份，直接覆盖安装即可保留账本。备份包含账单和备忘录，导入会核对已有编号和扫描来源。</p><div class="button-row"><button class="secondary" id="export">导出备份</button><button class="secondary" id="import">导入备份</button></div><input type="file" class="import-input" id="import-file" accept="application/json,.json"></section><p class="subtle" style="text-align:center">日常账本 1.6 · 本机保存</p>`;
 }
 function fitDayAmounts(){
   const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');if(!ctx)return;
@@ -98,6 +103,8 @@ function render(){
   requestAnimationFrame(fitDayAmounts);
   $('month-picker')?.addEventListener('change',e=>{if(/^20\d\d-(0[1-9]|1[0-2])$/.test(e.target.value)){month=e.target.value;render();}});
   $('overlay-settings')?.addEventListener('click',()=>AndroidLedger.openOverlaySettings());
+  $('add-desktop-icon')?.addEventListener('click',()=>AndroidLedger.addDesktopIcon());
+  $('refresh-desktop-icon')?.addEventListener('click',()=>AndroidLedger.refreshDesktopIcon());
   $('start-scan')?.addEventListener('click',()=>{try{const r=JSON.parse(AndroidLedger.startScanner($('scan-month').value));if(!r.ok)throw new Error(r.error||'无法开启扫描');toast('请确认系统屏幕共享授权，再切到对应账单页');}catch(e){toast(e.message);}});
   $('stop-scan')?.addEventListener('click',()=>{AndroidLedger.stopScanner();toast('已关闭悬浮窗');});
   $('confirm-scans')?.addEventListener('click',()=>{try{const r=transact('confirmBatch',{ids:state.pending.filter(p=>p.duplicateStatus!=='possible').map(p=>p.id)});render();toast(`已入账 ${r.confirmed||0} 笔${r.conflicts?'，疑似重复请单独核对':''}`);}catch(e){toast(e.message);}});
@@ -124,6 +131,14 @@ window.receiveBackup=prepareImport;
 window.nativeNotice=toast;
 window.refreshLedger=()=>{refresh();render();if($('day-dialog').open){$('day-dialog').close();}};
 window.openScanQueue=()=>{page='settings';refresh();render();$('scan-queue')?.scrollIntoView({behavior:'smooth'});return true;};
+window.openLauncherHome=()=>{
+  refresh();
+  const destination=storageError?'calendar':C.launcherDestination(state.memos);
+  document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());confirmAction=null;
+  page=destination==='matrix'?'memos':'calendar';if(destination==='matrix')memoView='matrix';
+  render();window.scrollTo(0,0);return true;
+};
+window.refreshDesktopStatus=()=>{if(page==='settings')render();};
 document.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;if(Date.now()<suppressMemoClick)return;
   try{
