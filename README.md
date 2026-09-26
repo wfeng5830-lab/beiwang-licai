@@ -1,12 +1,20 @@
-# 日常账本 1.5（安卓 · 屏幕扫描版）
+# 日常账本 1.6（安卓 · 四象限桌面提醒）
 
 本地消费账本，支持日历明细、月总和周总直角柱状图。支持 Android 8.0 及以上。截图仅在内存中离线识别，不保存、不上传。无需通知监听或无障碍服务。
 
 ## 安装
 
-先在旧版导出账本备份，再将 output/daily-ledger-1.5.0.apk 发到手机覆盖安装，不要卸载旧版。应用标识、签名保持一致，已入账记录保留。这是个人试用调试版。
+先在旧版导出账本备份，再从 [GitHub Release](https://github.com/wfeng5830-lab/beiwang-licai/releases/latest) 下载新版 APK 发到手机覆盖安装，不要卸载旧版。应用标识、签名保持一致，已有记录保留。这是个人试用调试版。
 
 ## 本次调整
+
+- 设置中新增“桌面四象限图标”，点“添加到桌面”并在系统弹窗确认。创建一个固定快捷入口，原应用图标保留，可自行从桌面移走旧图标，无需卸载软件。
+- 每个象限独立显示：空象限留空，单件显示大字，多件显示四小格，超过四件显示剩余数量。按九格中的位置顺序展示前四件。未分配或已完成事项不进入图标，全部清空后恢复默认图案。
+- 修改、移动、完成、删除事项或导入备份后自动提交图标更新。更新在后台线程运行；系统暂缓或失败时不影响事项保存，下次打开重试，也可在设置中手动刷新。
+- 从应用图标或新增快捷图标打开时，仅“重要且紧急”象限存在未完成事项才进入四象限；其他情况打开账单花销。扫描悬浮窗返回仍打开待核对页面。
+- 图案缩放、附带的应用标记与刷新速度由手机桌面控制。没有额外的无障碍、通知或联网权限；不后台持续运行。
+
+## 已有的四象限待办
 
 - 备忘录改为一句话待办，新增时只填事项，不再分标题和正文。旧标题与正文在清单中完整合并显示，原记录不会在升级时被改写。
 - 清单／四象限两个视图。四象限为重要且紧急、重要不紧急、紧急不重要、不紧急不重要，每个象限 3×3 共 9 格，总计 36 格。
@@ -44,11 +52,11 @@
 
 环境：JDK 21、Gradle 8.11.1、Android Gradle Plugin 8.9.2、SDK Platform 35、Build Tools 35.0.0。本机工具在 .tools/，不打包进 APK。离线中文模型 com.google.mlkit:text-recognition-chinese:16.0.1 随包提供，因此安装包约 47 MB。Manifest 移除了联网权限。
 
-运行 powershell -ExecutionPolicy Bypass -File scripts/build-android.ps1 生成安装包；node --test tests/core.test.cjs 检查账本计算。Java 测试位于 tests/BillParserTest.java、tests/ScanIdentityTest.java、tests/LedgerStoreTest.java，覆盖自动识别支付方式、解析、去重、候选编辑和入账，以及备忘录持久化、编辑、删除、备份去重和导入失败回滚。
+运行 powershell -ExecutionPolicy Bypass -File scripts/build-android.ps1 生成与 package.json 版本一致的安装包；npm test 检查账本计算和首页条件。运行 powershell -ExecutionPolicy Bypass -File scripts/test-java.ps1 执行 Java 测试（需要本机 JDK 21 与 .tools/json-test.jar）。包括账单解析、去重、持久化、备份回滚、混合图标模型及快捷方式控制器的取消、重复添加、系统暂缓与重试。控制器测试模拟 Android 桌面接口，不代替真机测试。
 
 node scripts/preview.cjs 可启动电脑界面预览，地址 http://127.0.0.1:4173。预览记录与手机独立，不支持原生扫描。
 
-已完成解析样例、数据逻辑测试和安卓构建、静态检查。尚未在真我 GT7 Pro 上实测屏幕授权、真实 OCR 和覆盖安装，样例通过不代表所有页面均能识别。
+已完成 10 项 JS 测试、127 项 Java 检查、安卓构建和静态检查，以及 Chrome 中模拟原生桥接的入口/设置交互检查。尚未在真我 GT7 Pro 上实测桌面确认、实际图案渲染和刷新、冷/热启动、屏幕授权、真实 OCR 和覆盖安装；测试通过不代表所有手机桌面与支付页面表现一致。
 
 接口说明：https://developer.android.com/media/grow/media-projection ，https://developers.google.com/ml-kit/vision/text-recognition/v2/android
 

@@ -11,6 +11,8 @@ if (Test-Path -LiteralPath 'C:/Program Files/Java/jdk-21') { $env:JAVA_HOME = 'C
 & $gradlePath --no-daemon assembleDebug
 if ($LASTEXITCODE -ne 0) { throw 'Android 构建失败，请查看以上错误。' }
 New-Item -ItemType Directory -Force (Join-Path $projectRoot 'output') | Out-Null
-Copy-Item -LiteralPath (Join-Path $projectRoot 'app/build/outputs/apk/debug/app-debug.apk') -Destination (Join-Path $projectRoot 'output/daily-ledger-1.5.0.apk')
-Write-Output 'APK 已生成：output/daily-ledger-1.5.0.apk'
+$appVersion = (Get-Content -Raw -LiteralPath (Join-Path $projectRoot 'package.json') | ConvertFrom-Json).version
+$apkName = "daily-ledger-$appVersion.apk"
+Copy-Item -LiteralPath (Join-Path $projectRoot 'app/build/outputs/apk/debug/app-debug.apk') -Destination (Join-Path $projectRoot "output/$apkName")
+Write-Output "APK 已生成：output/$apkName"
 

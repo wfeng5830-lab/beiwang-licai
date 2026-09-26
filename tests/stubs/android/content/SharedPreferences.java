@@ -2,5 +2,5 @@ package android.content;
 public interface SharedPreferences {
     String getString(String key,String fallback);
     Editor edit();
-    interface Editor { Editor putString(String key,String value); boolean commit(); }
+    interface Editor { Editor putString(String key,String value); boolean commit(); default Editor remove(String key){throw new UnsupportedOperationException();} default void apply(){commit();} }
 }

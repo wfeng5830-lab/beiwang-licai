@@ -27,9 +27,10 @@ import java.util.Arrays;
 public final class MainActivity extends Activity {
     private WebView web;
     private LedgerStore ledger;
+    private boolean pendingLauncherEntry;
     private static final int EXPORT=10, IMPORT=11, CAPTURE=12;
     @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);ledger=new LedgerStore(this);
+        super.onCreate(bundle);ledger=new LedgerStore(this);pendingLauncherEntry=isLauncherIntent(getIntent());
         FrameLayout container=new FrameLayout(this);web=new WebView(this);container.addView(web);setContentView(container);
         container.setOnApplyWindowInsetsListener((v,insets)->{v.setPadding(insets.getSystemWindowInsetLeft(),insets.getSystemWindowInsetTop(),insets.getSystemWindowInsetRight(),insets.getSystemWindowInsetBottom());return insets.consumeSystemWindowInsets();});
         // JavaScript is required by our bundled UI. All requests are allowlisted below;
@@ -39,7 +40,7 @@ public final class MainActivity extends Activity {
         web.getSettings().setAllowFileAccessFromFileURLs(false);web.getSettings().setAllowUniversalAccessFromFileURLs(false);
         web.setWebChromeClient(new WebChromeClient());
         web.setWebViewClient(new WebViewClient(){
-            @Override public void onPageFinished(WebView view,String url){handleScanIntent();}
+            @Override public void onPageFinished(WebView view,String url){handleEntryIntent();}
             @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest request){return true;}
             @Override public WebResourceResponse shouldInterceptRequest(WebView view,WebResourceRequest request){
                 String url=request.getUrl().toString(),prefix="https://ledger.local/";
@@ -55,14 +56,35 @@ public final class MainActivity extends Activity {
         web.addJavascriptInterface(new Bridge(),"AndroidLedger");
         web.loadUrl("https://ledger.local/index.html");
     }
-    @Override protected void onResume(){super.onResume();if(web!=null)web.evaluateJavascript("window.refreshLedger && window.refreshLedger()",null);}
-    @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);handleScanIntent();}
-    private void handleScanIntent(){if(web!=null&&getIntent().getBooleanExtra("open_scans",false)){web.evaluateJavascript("window.openScanQueue && window.openScanQueue()",value->{if(!"null".equals(value))getIntent().removeExtra("open_scans");});}}
+    @Override protected void onResume(){super.onResume();DesktopShortcut.refreshAsync(this,false);if(web!=null)web.evaluateJavascript("window.refreshLedger && window.refreshLedger()",null);}
+    @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);pendingLauncherEntry=isLauncherIntent(intent);handleEntryIntent();}
+    private static boolean isLauncherIntent(Intent intent){return intent!=null&&(DesktopShortcut.ACTION_OPEN.equals(intent.getAction())||(Intent.ACTION_MAIN.equals(intent.getAction())&&intent.hasCategory(Intent.CATEGORY_LAUNCHER)));}
+    private void handleEntryIntent(){
+        if(web==null)return;
+        final Intent entry=getIntent();
+        if(entry.getBooleanExtra("open_scans",false)){
+            pendingLauncherEntry=false;
+            web.evaluateJavascript("window.openScanQueue && window.openScanQueue()",value->{if("true".equals(value)&&getIntent()==entry)entry.removeExtra("open_scans");});
+        }else if(pendingLauncherEntry){
+            // Keep the request pending until bundled JavaScript is ready on cold launch.
+            web.evaluateJavascript("window.openLauncherHome && window.openLauncherHome()",value->{if("true".equals(value)&&getIntent()==entry)pendingLauncherEntry=false;});
+        }
+    }
     @Override protected void onDestroy(){if(web!=null){web.removeJavascriptInterface("AndroidLedger");web.destroy();}super.onDestroy();}
-    private void jsNotice(String message){runOnUiThread(()->web.evaluateJavascript("window.nativeNotice && window.nativeNotice("+JSONObject.quote(message)+")",null));}
+    private void jsNotice(String message){runOnUiThread(()->{if(!isDestroyed()&&web!=null)web.evaluateJavascript("window.nativeNotice && window.nativeNotice("+JSONObject.quote(message)+")",null);});}
+    private void refreshDesktopStatus(){runOnUiThread(()->{if(!isDestroyed()&&web!=null)web.evaluateJavascript("window.refreshDesktopStatus && window.refreshDesktopStatus()",null);});}
     private final class Bridge {
         @JavascriptInterface public String read(){try{return ledger.read();}catch(Exception ignored){return "null";}}
-        @JavascriptInterface public String mutate(String action,String payload){return ledger.mutate(action,payload);}
+        @JavascriptInterface public String mutate(String action,String payload){
+            String result=ledger.mutate(action,payload);
+            if(Arrays.asList("saveMemo","moveMemo","deleteMemo","importBundle").contains(action)){
+                try{if(new JSONObject(result).optBoolean("ok"))DesktopShortcut.refreshAsync(MainActivity.this,false);}catch(Exception ignored){}
+            }
+            return result;
+        }
+        @JavascriptInterface public String desktopIconStatus(){return DesktopShortcut.status(MainActivity.this);}
+        @JavascriptInterface public void addDesktopIcon(){DesktopShortcut.runAsync(()->{jsNotice(DesktopShortcut.requestPin(getApplicationContext()));refreshDesktopStatus();});}
+        @JavascriptInterface public void refreshDesktopIcon(){DesktopShortcut.runAsync(()->{DesktopShortcut.refresh(getApplicationContext(),true);jsNotice("已尝试刷新，请查看桌面图标状态");refreshDesktopStatus();});}
         @JavascriptInterface public String scannerStatus(){try{return new JSONObject().put("enabled",Settings.canDrawOverlays(MainActivity.this)).put("connected",BillScanService.connected()).put("month",getSharedPreferences("scanner",MODE_PRIVATE).getString("month",LocalDate.now().toString().substring(0,7))).toString();}catch(Exception ignored){return "{}";}}
         @JavascriptInterface public void openOverlaySettings(){runOnUiThread(()->{try{startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,Uri.parse("package:"+getPackageName())));}catch(Exception ignored){jsNotice("请在系统设置中允许日常账本显示在其他应用上层");}});}
         @JavascriptInterface public String startScanner(String month){
