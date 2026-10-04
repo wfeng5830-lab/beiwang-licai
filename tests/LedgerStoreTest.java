@@ -53,6 +53,34 @@ public final class LedgerStoreTest {
         check(state(roundtrip).getJSONArray("memos").getJSONObject(0).getInt("slot")==1&&state(roundtrip).getJSONArray("memos").getJSONObject(1).getBoolean("done"),"matrix and completed state survive backup");
         JSONObject conflict=new JSONObject().put("entries",new JSONArray()).put("memos",new JSONArray().put(new JSONObject().put("id","extra").put("title","").put("body","额外事项").put("slot",1)));
         check(call(roundtrip,"importBundle",conflict).getBoolean("ok")&&state(roundtrip).getJSONArray("memos").getJSONObject(36).getInt("slot")==-1,"backup slot conflict keeps incoming task unassigned");
+        Memory dm=new Memory();LedgerStore dates=new LedgerStore(dm);
+        BillParser.Bill undated=new BillParser.Bill("","12:30","测试日期店","alipay",1800,"09-30 12:30");
+        JSONObject dr=dates.scan(Arrays.asList(undated));check(dr.getInt("added")==1&&dr.getInt("incomplete")==1,"incomplete scan is queued and reported");
+        dates=new LedgerStore(dm);JSONObject dp=state(dates).getJSONArray("pending").getJSONObject(0);
+        check(dp.getString("date").isEmpty()&&dp.getString("dateHint").contains("09-30"),"missing date and hint persist without fake date");
+        check(state(dates).getJSONArray("entries").length()==0,"incomplete candidate not booked");
+        JSONObject invented=new JSONObject(dp.toString()).put("date","2026-09-30");
+        check(!call(dates,"confirm",new JSONObject().put("id",dp.getString("id")).put("entry",invented)).getBoolean("ok"),"confirm cannot bypass pending date completion");
+        check(!call(dates,"upsert",dp).getBoolean("ok"),"booked entries still require real date");
+        check(!call(dates,"import",new JSONArray().put(dp)).getBoolean("ok"),"imports still require real date");
+        BillParser.Bill dated=new BillParser.Bill("2026-09-29","11:30","另一店铺","alipay",1200);dates.scan(Arrays.asList(dated));
+        JSONArray dateIds=new JSONArray();for(int i=0;i<state(dates).getJSONArray("pending").length();i++)dateIds.put(state(dates).getJSONArray("pending").getJSONObject(i).getString("id"));
+        JSONObject db=call(dates,"confirmBatch",new JSONObject().put("ids",dateIds));check(db.getInt("confirmed")==1&&db.getInt("incomplete")==1,"mixed batch confirms complete and leaves incomplete");
+        check(state(dates).getJSONArray("pending").length()==1,"batch preserves missing-date review row");
+        check(call(dates,"editCandidate",new JSONObject().put("id",dp.getString("id")).put("entry",invented)).getBoolean("ok"),"manual date completion saved");
+        dp=state(dates).getJSONArray("pending").getJSONObject(0);
+        String corrected=ScanIdentity.key("alipay","2026-09-30","12:30",1800,"测试日期店");check(dp.getString("sourceKey").equals(corrected),"completed date uses canonical identity");
+        check(call(dates,"confirm",new JSONObject().put("id",dp.getString("id")).put("entry",dp)).getBoolean("ok"),"completed row can book");
+        check(dates.scan(Arrays.asList(new BillParser.Bill("2026-09-30","12:30","测试日期店","alipay",1800))).getInt("duplicates")==1,"full-date rescan deduplicates after completion");
+        dates.scan(Arrays.asList(undated,undated));check(state(dates).getJSONArray("pending").length()==2,"unknown-date same amount rows not silently merged");
+        dp=state(dates).getJSONArray("pending").getJSONObject(0);invented=new JSONObject(dp.toString()).put("date","2026-09-30");
+        call(dates,"editCandidate",new JSONObject().put("id",dp.getString("id")).put("entry",invented));dp=state(dates).getJSONArray("pending").getJSONObject(0);
+        check(dp.getString("duplicateStatus").equals("possible"),"completion rechecks existing records");
+        check(!call(dates,"confirm",new JSONObject().put("id",dp.getString("id")).put("entry",dp).put("forceDuplicate",true)).getBoolean("ok"),"exact completed identity cannot double book");
+        dates.scan(Arrays.asList(new BillParser.Bill("2026-09-30","","无时间测试店","wechat",600)));
+        JSONObject noTime=state(dates).getJSONArray("pending").getJSONObject(2);check(noTime.getString("time").isEmpty(),"missing time persists blank");
+        check(!call(dates,"editCandidate",new JSONObject().put("id",noTime.getString("id")).put("entry",noTime)).getBoolean("ok"),"edit cannot save incomplete time for booking");
+        call(dates,"dismiss",new JSONObject().put("id",noTime.getString("id")));check(state(dates).getJSONArray("pending").length()==2,"incomplete candidate can be dismissed");
         System.out.println("Ledger storage: "+checks+" checks passed");
     }
 }

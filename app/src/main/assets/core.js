@@ -25,6 +25,7 @@
     if(e.sourceKey!==undefined){if(typeof e.sourceKey!=='string'||!/^[a-f0-9]{64}$/.test(e.sourceKey))throw new Error('扫描来源编号不正确');result.sourceKey=e.sourceKey;}
     return result;
   }
+  function scanReady(e){try{validateEntry(e);return true;}catch(error){return false;}}
   const sum = entries => entries.reduce((s,e) => s+e.cents,0);
   const monthEntries = (entries, month) => entries.filter(e => e.date.startsWith(month+'-'));
   function monthDays(month) {
@@ -67,6 +68,6 @@
     const occupied=next.find(x=>x.id!==id&&x.slot===slot&&slot>=0);if(occupied)throw new Error('该格已有事项，请选择空格');m.slot=slot;return next;
   }
   function parseBackupMemos(text){const data=JSON.parse(text),memos=data.memos??[];if(!Array.isArray(memos)||memos.length>1000)throw new Error('备忘录备份无效');const result=memos.map(validateMemo);if(new Set(result.map(m=>m.id)).size!==result.length)throw new Error('备忘录编号重复');return result;}
-  root.LedgerCore={pad,dateKey,parseDate,money,toCents,validateEntry,sum,monthEntries,monthDays,weeks,annual,parseBackup,validateMemo,parseBackupMemos,memoText,moveMemo,launcherDestination};
+  root.LedgerCore={pad,dateKey,parseDate,money,toCents,validateEntry,scanReady,sum,monthEntries,monthDays,weeks,annual,parseBackup,validateMemo,parseBackupMemos,memoText,moveMemo,launcherDestination};
   if(typeof module!=='undefined') module.exports=root.LedgerCore;
 })(typeof window==='undefined'?globalThis:window);

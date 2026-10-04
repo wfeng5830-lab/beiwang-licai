@@ -78,3 +78,11 @@ test('quadrants support 36 distinct slots, reject collisions, and completion rel
  assert.equal(C.memoText(legacy),'原标题\n原内容\n第二行');assert.equal(legacy.done,false);assert.equal(legacy.slot,-1);
  const m=C.validateMemo({...legacy,mark:'药',slot:22});assert.deepEqual(C.parseBackupMemos(JSON.stringify({memos:[m]})),[m]);
 });
+
+
+test('scan readiness excludes incomplete dates and times from bulk confirmation',()=>{
+ const row={id:'scan_test',date:'2026-09-30',time:'12:30',cents:1800,channel:'alipay',category:'其他',note:'测试店铺',source:'scan'};
+ assert.equal(C.scanReady(row),true);
+ for(const missing of [{date:''},{time:''},{date:'2026-02-30'},{date:undefined}]){assert.equal(C.scanReady({...row,...missing}),false);assert.throws(()=>C.validateEntry({...row,...missing}));}
+ assert.equal(C.scanReady({...row,date:'2024-02-29'}),true);
+});

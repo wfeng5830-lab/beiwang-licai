@@ -23,6 +23,7 @@
 <dialog id="entry-dialog"><form id="entry-form">
   <div class="dialog-heading"><h2 id="entry-title">记一笔支出</h2><button type="button" class="icon-button" data-close="entry-dialog" aria-label="关闭">×</button></div>
   <input type="hidden" id="entry-id">
+  <p id="scan-edit-hint" class="notice warning" hidden></p>
   <label class="amount-label" for="amount">消费金额（元）</label><div class="amount-input"><span>¥</span><input id="amount" inputmode="decimal" placeholder="0.00" required autocomplete="off" maxlength="12"></div>
   <div class="form-grid"><label>消费日期<input type="date" id="date" required min="2000-01-01" max="2099-12-31"></label><label>时间<input type="time" id="time" required></label></div>
   <label>支付方式<select id="channel"><option value="wechat">微信支付</option><option value="alipay">支付宝</option><option value="other">其他</option></select></label>
