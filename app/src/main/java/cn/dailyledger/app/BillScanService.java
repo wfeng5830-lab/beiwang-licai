@@ -34,7 +34,6 @@ public final class BillScanService extends Service {
     private Button scanButton;
     private int width,height,density,generation;
     private boolean busy,wantFrame,destroyed,visible=true;
-    private String captureMonth;
     public static boolean connected(){return instance!=null&&instance.projection!=null;}
     public static boolean floating(){return connected();}
     public static void hideFloating(){BillScanService s=instance;if(s!=null)s.main.post(s::stopSelf);}
@@ -70,7 +69,6 @@ public final class BillScanService extends Service {
         return START_NOT_STICKY;
     }
     private int dp(int n){return Math.round(n*getResources().getDisplayMetrics().density);}
-    private String month(){return getSharedPreferences("scanner",MODE_PRIVATE).getString("month",LocalDate.now().toString().substring(0,7));}
     private Button button(String text,int w){Button b=new Button(this);b.setText(text);b.setTextSize(13);b.setTextColor(0xff176a59);b.setAllCaps(false);b.setPadding(0,0,0,0);b.setMinimumWidth(0);b.setMinWidth(0);b.setMinimumHeight(0);b.setMinHeight(0);b.setBackgroundColor(Color.TRANSPARENT);b.setLayoutParams(new LinearLayout.LayoutParams(dp(w),dp(42)));return b;}
     private void showOverlay(){
         overlay=new LinearLayout(this);overlay.setOrientation(LinearLayout.HORIZONTAL);overlay.setGravity(Gravity.CENTER_VERTICAL);
@@ -88,7 +86,7 @@ public final class BillScanService extends Service {
     @Override public void onConfigurationChanged(android.content.res.Configuration configuration){super.onConfigurationChanged(configuration);if(Build.VERSION.SDK_INT<34&&manager!=null){DisplayMetrics metrics=new DisplayMetrics();manager.getDefaultDisplay().getRealMetrics(metrics);resize(metrics.widthPixels,metrics.heightPixels);}}
     private void scan(){
         if(busy||projection==null||display==null)return;if(!visible){message("请显示正在共享的账单页面");return;}
-        busy=true;captureMonth=month();int token=++generation;scanButton.setEnabled(false);overlay.setVisibility(View.INVISIBLE);
+        busy=true;int token=++generation;scanButton.setEnabled(false);overlay.setVisibility(View.INVISIBLE);
         main.postDelayed(()->{if(destroyed||token!=generation)return;try{Image stale;while((stale=reader.acquireLatestImage())!=null)stale.close();wantFrame=true;display.setSurface(reader.getSurface());}catch(RuntimeException e){cancelScan("无法读取屏幕，请停止后重新授权");}},250);
         main.postDelayed(()->{if(token==generation&&busy)cancelScan("扫描超时，请保持账单页面静止后重试");},20000);
     }
@@ -107,19 +105,19 @@ public final class BillScanService extends Service {
                 ByteBuffer complete=ByteBuffer.allocate(required);complete.put(buffer);complete.rewind();buffer=complete;
             }
             padded.copyPixelsFromBuffer(buffer);bitmap=Bitmap.createBitmap(padded,0,0,image.getWidth(),image.getHeight());if(bitmap!=padded)padded.recycle();padded=null;
-            int token=generation;Bitmap captured=bitmap;bitmap=null;recognize(token,captured,captureMonth);
+            int token=generation;Bitmap captured=bitmap;bitmap=null;recognize(token,captured);
         }catch(RuntimeException e){cancelScan("读取屏幕失败，请重试或重新授权");}finally{if(image!=null)image.close();if(padded!=null)padded.recycle();if(bitmap!=null)bitmap.recycle();}
     }
-    private void recognize(int token,Bitmap bitmap,String selectedMonth){
+    private void recognize(int token,Bitmap bitmap){
         try{
             if(recognizer==null)recognizer=TextRecognition.getClient(new ChineseTextRecognizerOptions.Builder().build());
             recognizer.process(InputImage.fromBitmap(bitmap,0)).addOnSuccessListener(text->{
                 if(destroyed||token!=generation)return;
                 try{
                     List<BillParser.Line> lines=new ArrayList<>();for(Text.TextBlock block:text.getTextBlocks())for(Text.Line line:block.getLines()){Rect r=line.getBoundingBox();if(r!=null)lines.add(new BillParser.Line(line.getText(),r.left,r.top,r.right,r.bottom));}
-                    BillParser.Result parsed=BillParser.parseAuto(lines,selectedMonth);
-                    if(!parsed.pageRecognized||parsed.bills.isEmpty()){finish(token,"未识别到完整支出，请显示账单顶部搜索栏、筛选栏并检查月份；受保护的黑屏无法扫描");return;}
-                    JSONObject result=new LedgerStore(this).scan(parsed.bills);finish(token,"新增 "+result.optInt("added")+" 笔，重复 "+result.optInt("duplicates")+" 笔"+(result.optInt("conflicts")>0?"，疑似重复 "+result.optInt("conflicts")+" 笔":"")+(result.optInt("overflow")>0?"；队列已满，请先核对":""));
+                    BillParser.Result parsed=BillParser.parseAuto(lines);
+                    if(!parsed.pageRecognized||parsed.bills.isEmpty()){finish(token,"未识别到支出，请显示完整商户、金额和顶部搜索栏；受保护的黑屏无法扫描");return;}
+                    JSONObject result=new LedgerStore(this).scan(parsed.bills);finish(token,"新增 "+result.optInt("added")+" 笔，重复 "+result.optInt("duplicates")+" 笔"+(result.optInt("incomplete")>0?"，待补日期/时间 "+result.optInt("incomplete")+" 笔":"")+(result.optInt("conflicts")>0?"，疑似重复 "+result.optInt("conflicts")+" 笔":"")+(result.optInt("overflow")>0?"；队列已满，请先核对":""));
                 }catch(Exception e){finish(token,"保存失败，请检查存储空间后重试");}
             }).addOnFailureListener(error->finish(token,"文字识别失败，请重试")).addOnCompleteListener(task->bitmap.recycle());
         }catch(RuntimeException e){bitmap.recycle();finish(token,"识别组件暂不可用，请重新开启扫描");}

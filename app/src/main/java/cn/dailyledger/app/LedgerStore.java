@@ -24,22 +24,25 @@ final class LedgerStore {
     private void save(JSONObject state) throws Exception {
         if (!prefs.edit().putString("state", state.toString()).commit()) throw new Exception("手机存储写入失败，请检查可用空间");
     }
-    private JSONObject validate(JSONObject input) throws Exception {
+    private JSONObject validate(JSONObject input) throws Exception {return validate(input,false);}
+    private static boolean incomplete(JSONObject e){return e.optString("date").isEmpty()||e.optString("time").isEmpty();}
+    private JSONObject validate(JSONObject input,boolean candidate) throws Exception {
         String id=input.getString("id"),date=input.getString("date"),time=input.getString("time");
         if(!id.matches("[a-zA-Z0-9_-]{1,100}")) throw new Exception("账单编号无效");
         Object amount = input.get("cents");
         if (!(amount instanceof Number) || ((Number)amount).doubleValue() != ((Number)amount).longValue()) throw new Exception("金额无效");
         long cents=((Number)amount).longValue();
         if(cents<=0 || cents>999999999L) throw new Exception("金额超出范围");
-        if(!date.matches("20\\d\\d-\\d{2}-\\d{2}") || !LocalDate.parse(date).toString().equals(date)) throw new Exception("日期无效");
-        if(!time.matches("([01]\\d|2[0-3]):[0-5]\\d")) throw new Exception("时间无效");
-        LocalTime.parse(time);
+        if(!(candidate&&date.isEmpty())&&(!date.matches("20\\d\\d-\\d{2}-\\d{2}") || !LocalDate.parse(date).toString().equals(date))) throw new Exception("日期无效");
+        if(!(candidate&&time.isEmpty())&&!time.matches("([01]\\d|2[0-3]):[0-5]\\d")) throw new Exception("时间无效");
+        if(!time.isEmpty())LocalTime.parse(time);
         String channel=input.getString("channel"),category=input.getString("category"),note=input.getString("note");
         if(!Arrays.asList("wechat","alipay","other").contains(channel)) throw new Exception("支付方式无效");
         if(!Arrays.asList("餐饮","购物","交通","生活缴费","娱乐","医疗","其他").contains(category)) throw new Exception("分类无效");
         if(note.length()>80) throw new Exception("备注最多 80 字");
         String source=input.optString("source");if(!Arrays.asList("notification","scan").contains(source))source="manual";
         JSONObject result=new JSONObject().put("id",id).put("date",date).put("time",time).put("cents",cents).put("channel",channel).put("category",category).put("note",note).put("source",source);
+        if(candidate){String hint=input.optString("dateHint");if(hint.length()>80)throw new Exception("日期提示过长");result.put("dateHint",hint);}
         if(input.has("sourceKey")){String key=input.getString("sourceKey");if(!key.matches("[a-f0-9]{64}"))throw new Exception("扫描来源无效");result.put("sourceKey",key);}return result;
     }
     private int find(JSONArray entries, String id) throws Exception {
@@ -79,12 +82,14 @@ final class LedgerStore {
                         int index=find(pending,data.getString("id"));if(index<0)throw new Exception("该扫描记录已处理");
                         JSONObject original=pending.getJSONObject(index),edited=validate(data.getJSONObject("entry"));
                         if(!original.getString("id").equals(edited.getString("id")))throw new Exception("扫描编号不一致");
-                        edited.put("source","scan").put("sourceKey",original.getString("sourceKey"));int match=possible(entries,edited);
+                        String correctedKey=incomplete(original)||original.optBoolean("dateCompleted")?ScanIdentity.key(edited.getString("channel"),edited.getString("date"),edited.getString("time"),edited.getLong("cents"),edited.getString("note")):original.getString("sourceKey");
+                        edited.put("source","scan").put("sourceKey",correctedKey).put("dateCompleted",incomplete(original)||original.optBoolean("dateCompleted"));int match=possible(entries,edited);
                         edited.put("duplicateStatus",match>=0?"possible":"new");if(match>=0)edited.put("duplicateId",entries.getJSONObject(match).getString("id"));pending.put(index,edited);
                     } else if("delete".equals(action)) {int index=find(entries,data.getString("id"));if(index>=0)entries.remove(index);}
                     else if("confirm".equals(action)) {
                         int index=find(pending,data.getString("id"));if(index<0)throw new Exception("该扫描记录已经处理，请刷新");
-                        JSONObject original=pending.getJSONObject(index),entry=validate(data.getJSONObject("entry"));
+                        JSONObject original=pending.getJSONObject(index);if(incomplete(original))throw new Exception("请先编辑补全日期和时间，再核对入账");
+                        JSONObject entry=validate(data.getJSONObject("entry"));
                         if(!original.getString("id").equals(entry.getString("id")))throw new Exception("扫描编号不一致");
                         entry.put("source","scan").put("sourceKey",original.getString("sourceKey"));
                         if(find(entries,entry.getString("id"))>=0||exact(entries,entry)>=0)throw new Exception("这笔原始扫描账单已经入账，请忽略重复记录");
@@ -92,13 +97,13 @@ final class LedgerStore {
                         if(conflict>=0&&!data.optBoolean("forceDuplicate")){original.put("duplicateStatus","possible").put("duplicateId",entries.getJSONObject(conflict).getString("id"));save(state);return new JSONObject().put("ok",false).put("code","possible_duplicate").put("error","疑似重复，请对比已有账单；若是另一笔消费，请勾选确认").toString();}
                         entries.put(entry);pending.remove(index);
                     } else if("confirmBatch".equals(action)) {
-                        JSONArray ids=data.getJSONArray("ids");if(ids.length()>1000)throw new Exception("批量数量过多");int confirmed=0,duplicates=0,conflicts=0;
-                        for(int i=0;i<ids.length();i++){int index=find(pending,ids.getString(i));if(index<0)continue;JSONObject entry=validate(pending.getJSONObject(index));
+                        JSONArray ids=data.getJSONArray("ids");if(ids.length()>1000)throw new Exception("批量数量过多");int confirmed=0,duplicates=0,conflicts=0,incompleteCount=0;
+                        for(int i=0;i<ids.length();i++){int index=find(pending,ids.getString(i));if(index<0)continue;if(incomplete(pending.getJSONObject(index))){incompleteCount++;continue;}JSONObject entry=validate(pending.getJSONObject(index));
                             if(exact(entries,entry)>=0||find(entries,entry.getString("id"))>=0){pending.remove(index);duplicates++;continue;}
                             int match=possible(entries,entry);if(match>=0){pending.getJSONObject(index).put("duplicateStatus","possible").put("duplicateId",entries.getJSONObject(match).getString("id"));conflicts++;continue;}
                             if(entries.length()>=50000)throw new Exception("账本已满，请先备份");entries.put(entry);pending.remove(index);confirmed++;
                         }
-                        save(state);return new JSONObject().put("ok",true).put("confirmed",confirmed).put("duplicates",duplicates).put("conflicts",conflicts).toString();
+                        save(state);return new JSONObject().put("ok",true).put("confirmed",confirmed).put("duplicates",duplicates).put("conflicts",conflicts).put("incomplete",incompleteCount).toString();
                     } else if("dismiss".equals(action)) {int index=find(pending,data.getString("id"));if(index>=0){JSONArray ignored=state.getJSONArray("ignored");ignored.put(pending.getJSONObject(index).getString("sourceKey"));if(ignored.length()>10000)ignored.remove(0);pending.remove(index);}}
                     else throw new Exception("未知操作");
                 }
@@ -119,15 +124,16 @@ final class LedgerStore {
         synchronized (LOCK) {
             JSONObject state=load();JSONArray pending=state.getJSONArray("pending"),entries=state.getJSONArray("entries"),ignored=state.getJSONArray("ignored");
             Set<String> dismissed=new HashSet<>();for(int i=0;i<ignored.length();i++)dismissed.add(ignored.getString(i));
-            int added=0,duplicates=0,conflicts=0,overflow=0;
-            for(BillParser.Bill b:bills){String key=ScanIdentity.key(b.channel,b.date,b.time,b.cents,b.note);
-                JSONObject e=new JSONObject().put("id","s_"+key).put("sourceKey",key).put("source","scan").put("cents",b.cents).put("date",b.date).put("time",b.time).put("channel",b.channel).put("note",b.note).put("category","其他");e=validate(e);
+            int added=0,duplicates=0,conflicts=0,overflow=0,incompleteCount=0;
+            for(BillParser.Bill b:bills){// Unknown dates cannot safely identify a transaction across different days.
+                String key=ScanIdentity.key(b.channel,b.incomplete()?"unresolved_"+java.util.UUID.randomUUID():b.date,b.time,b.cents,b.note);
+                JSONObject e=new JSONObject().put("id","s_"+key).put("sourceKey",key).put("source","scan").put("cents",b.cents).put("date",b.date).put("time",b.time).put("channel",b.channel).put("note",b.note).put("category","其他").put("dateHint",b.dateHint);e=validate(e,true);
                 if(dismissed.contains(key)||exact(entries,e)>=0||exact(pending,e)>=0){duplicates++;continue;}
                 if(pending.length()>=1000){overflow++;continue;}
-                int match=possible(entries,e);e.put("duplicateStatus",match>=0?"possible":"new");if(match>=0){e.put("duplicateId",entries.getJSONObject(match).getString("id"));conflicts++;}
-                pending.put(e);added++;
+                int match=b.incomplete()?-1:possible(entries,e);e.put("duplicateStatus",match>=0?"possible":"new");if(match>=0){e.put("duplicateId",entries.getJSONObject(match).getString("id"));conflicts++;}
+                pending.put(e);added++;if(b.incomplete())incompleteCount++;
             }
-            save(state);return new JSONObject().put("added",added).put("duplicates",duplicates).put("conflicts",conflicts).put("overflow",overflow);
+            save(state);return new JSONObject().put("added",added).put("duplicates",duplicates).put("conflicts",conflicts).put("overflow",overflow).put("incomplete",incompleteCount);
         }
     }
     String exportBackup() throws Exception {synchronized(LOCK){JSONObject s=load();return new JSONObject().put("version",1).put("entries",s.getJSONArray("entries")).put("memos",s.getJSONArray("memos")).toString(2);}}

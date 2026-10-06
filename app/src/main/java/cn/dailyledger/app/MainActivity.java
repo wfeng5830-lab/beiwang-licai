@@ -85,13 +85,11 @@ public final class MainActivity extends Activity {
         @JavascriptInterface public String desktopIconStatus(){return DesktopShortcut.status(MainActivity.this);}
         @JavascriptInterface public void addDesktopIcon(){DesktopShortcut.runAsync(()->{jsNotice(DesktopShortcut.requestPin(getApplicationContext()));refreshDesktopStatus();});}
         @JavascriptInterface public void refreshDesktopIcon(){DesktopShortcut.runAsync(()->{DesktopShortcut.refresh(getApplicationContext(),true);jsNotice("已尝试刷新，请查看桌面图标状态");refreshDesktopStatus();});}
-        @JavascriptInterface public String scannerStatus(){try{return new JSONObject().put("enabled",Settings.canDrawOverlays(MainActivity.this)).put("connected",BillScanService.connected()).put("month",getSharedPreferences("scanner",MODE_PRIVATE).getString("month",LocalDate.now().toString().substring(0,7))).toString();}catch(Exception ignored){return "{}";}}
+        @JavascriptInterface public String scannerStatus(){try{return new JSONObject().put("enabled",Settings.canDrawOverlays(MainActivity.this)).put("connected",BillScanService.connected()).toString();}catch(Exception ignored){return "{}";}}
         @JavascriptInterface public void openOverlaySettings(){runOnUiThread(()->{try{startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,Uri.parse("package:"+getPackageName())));}catch(Exception ignored){jsNotice("请在系统设置中允许日常账本显示在其他应用上层");}});}
-        @JavascriptInterface public String startScanner(String month){
+        @JavascriptInterface public String startScanner(){
             try{
-                if(!month.matches("20\\d\\d-(0[1-9]|1[0-2])"))throw new Exception("请选择正确的账单月份");
                 if(!Settings.canDrawOverlays(MainActivity.this))throw new Exception("请先允许显示悬浮窗");
-                if(!getSharedPreferences("scanner",MODE_PRIVATE).edit().putString("month",month).remove("channel").commit())throw new Exception("保存扫描设置失败");
                 if(BillScanService.connected()){return "{\"ok\":true}";}
                 runOnUiThread(()->{try{MediaProjectionManager manager=getSystemService(MediaProjectionManager.class);Intent intent=Build.VERSION.SDK_INT>=34?manager.createScreenCaptureIntent(MediaProjectionConfig.createConfigForDefaultDisplay()):manager.createScreenCaptureIntent();startActivityForResult(intent,CAPTURE);}catch(Exception e){jsNotice("系统无法开启屏幕共享，请重试");}});
                 return "{\"ok\":true}";
