@@ -89,7 +89,7 @@ function settingsPage(){
   <section class="card settings-card"><div class="section-heading"><h2>桌面四象限图标</h2><span class="pill">${desktop.pinned?'已添加':'未添加'}</span></div>
   ${native?`<p class="settings-copy" role="status">${escapeHTML(desktop.message)}</p>${desktop.supported||desktop.pinned?`<div class="button-row">${desktop.pinned?'<button class="secondary" id="refresh-desktop-icon">刷新图标</button>':'<button class="primary" id="add-desktop-icon">添加到桌面</button>'}</div>`:'<p class="settings-copy">当前桌面不支持添加快捷图标。</p>'}`:'<p class="settings-copy">安装安卓应用后可添加桌面快捷图标。</p>'}
   <details class="settings-help"><summary>图标使用说明</summary><p>每个象限：一件待办显示大字，多件显示四小格，按格子顺序展示前四件，多出的数量用 + 标注。全部清空后恢复默认图案。</p><p>只有“重要且紧急”象限有未完成事项，点击图标才进入四象限；其他情况打开账单花销。</p><p>首次添加需在系统弹窗确认。这是新增快捷图标，原图标保留，可手动从桌面移走，无需卸载。小应用标记、样式与刷新速度由手机桌面决定。</p></details></section>
-  <p class="subtle" style="text-align:center">日常账本 1.6.2 本地测试 · 本机保存</p>`;
+  <p class="subtle" style="text-align:center">日常账本 1.6.2 · 本机保存</p>`;
 }
 function fitDayAmounts(){
   const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');if(!ctx)return;
