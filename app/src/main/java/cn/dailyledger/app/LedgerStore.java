@@ -25,7 +25,7 @@ final class LedgerStore {
         if (!prefs.edit().putString("state", state.toString()).commit()) throw new Exception("手机存储写入失败，请检查可用空间");
     }
     private JSONObject validate(JSONObject input) throws Exception {return validate(input,false);}
-    private static boolean incomplete(JSONObject e){return e.optString("date").isEmpty()||e.optString("time").isEmpty();}
+    private static boolean incomplete(JSONObject e){return e.optString("date").isEmpty();}
     private JSONObject validate(JSONObject input,boolean candidate) throws Exception {
         String id=input.getString("id"),date=input.getString("date"),time=input.getString("time");
         if(!id.matches("[a-zA-Z0-9_-]{1,100}")) throw new Exception("账单编号无效");
@@ -34,7 +34,7 @@ final class LedgerStore {
         long cents=((Number)amount).longValue();
         if(cents<=0 || cents>999999999L) throw new Exception("金额超出范围");
         if(!(candidate&&date.isEmpty())&&(!date.matches("20\\d\\d-\\d{2}-\\d{2}") || !LocalDate.parse(date).toString().equals(date))) throw new Exception("日期无效");
-        if(!(candidate&&time.isEmpty())&&!time.matches("([01]\\d|2[0-3]):[0-5]\\d")) throw new Exception("时间无效");
+        if(!time.isEmpty()&&!time.matches("([01]\\d|2[0-3]):[0-5]\\d")) throw new Exception("时间无效");
         if(!time.isEmpty())LocalTime.parse(time);
         String channel=input.getString("channel"),category=input.getString("category"),note=input.getString("note");
         if(!Arrays.asList("wechat","alipay","other").contains(channel)) throw new Exception("支付方式无效");
@@ -82,13 +82,14 @@ final class LedgerStore {
                         int index=find(pending,data.getString("id"));if(index<0)throw new Exception("该扫描记录已处理");
                         JSONObject original=pending.getJSONObject(index),edited=validate(data.getJSONObject("entry"));
                         if(!original.getString("id").equals(edited.getString("id")))throw new Exception("扫描编号不一致");
-                        String correctedKey=incomplete(original)||original.optBoolean("dateCompleted")?ScanIdentity.key(edited.getString("channel"),edited.getString("date"),edited.getString("time"),edited.getLong("cents"),edited.getString("note")):original.getString("sourceKey");
+                        boolean completing=incomplete(original)||original.optString("time").isEmpty()||original.optBoolean("dateCompleted");
+                        String correctedKey=completing&&!edited.getString("time").isEmpty()?ScanIdentity.key(edited.getString("channel"),edited.getString("date"),edited.getString("time"),edited.getLong("cents"),edited.getString("note")):original.getString("sourceKey");
                         edited.put("source","scan").put("sourceKey",correctedKey).put("dateCompleted",incomplete(original)||original.optBoolean("dateCompleted"));int match=possible(entries,edited);
                         edited.put("duplicateStatus",match>=0?"possible":"new");if(match>=0)edited.put("duplicateId",entries.getJSONObject(match).getString("id"));pending.put(index,edited);
                     } else if("delete".equals(action)) {int index=find(entries,data.getString("id"));if(index>=0)entries.remove(index);}
                     else if("confirm".equals(action)) {
                         int index=find(pending,data.getString("id"));if(index<0)throw new Exception("该扫描记录已经处理，请刷新");
-                        JSONObject original=pending.getJSONObject(index);if(incomplete(original))throw new Exception("请先编辑补全日期和时间，再核对入账");
+                        JSONObject original=pending.getJSONObject(index);if(incomplete(original))throw new Exception("请先编辑补全日期，再核对入账");
                         JSONObject entry=validate(data.getJSONObject("entry"));
                         if(!original.getString("id").equals(entry.getString("id")))throw new Exception("扫描编号不一致");
                         entry.put("source","scan").put("sourceKey",original.getString("sourceKey"));
@@ -118,15 +119,15 @@ final class LedgerStore {
         for(int i=0;i<entries.length();i++)if(key.equals(entries.getJSONObject(i).optString("sourceKey")))return i;return -1;
     }
     private int possible(JSONArray entries,JSONObject e)throws Exception{
-        for(int i=0;i<entries.length();i++){JSONObject old=entries.getJSONObject(i);if(old.getString("channel").equals(e.getString("channel"))&&old.getString("date").equals(e.getString("date"))&&old.getString("time").equals(e.getString("time"))&&old.getLong("cents")==e.getLong("cents"))return i;}return -1;
+        for(int i=0;i<entries.length();i++){JSONObject old=entries.getJSONObject(i);if(old.getString("channel").equals(e.getString("channel"))&&old.getString("date").equals(e.getString("date"))&&(old.getString("time").isEmpty()||e.getString("time").isEmpty()||old.getString("time").equals(e.getString("time")))&&old.getLong("cents")==e.getLong("cents"))return i;}return -1;
     }
     JSONObject scan(java.util.List<BillParser.Bill> bills) throws Exception {
         synchronized (LOCK) {
             JSONObject state=load();JSONArray pending=state.getJSONArray("pending"),entries=state.getJSONArray("entries"),ignored=state.getJSONArray("ignored");
             Set<String> dismissed=new HashSet<>();for(int i=0;i<ignored.length();i++)dismissed.add(ignored.getString(i));
             int added=0,duplicates=0,conflicts=0,overflow=0,incompleteCount=0;
-            for(BillParser.Bill b:bills){// Unknown dates cannot safely identify a transaction across different days.
-                String key=ScanIdentity.key(b.channel,b.incomplete()?"unresolved_"+java.util.UUID.randomUUID():b.date,b.time,b.cents,b.note);
+            for(BillParser.Bill b:bills){// Missing date/time cannot establish an exact identity, even if booking is allowed.
+                String key=ScanIdentity.key(b.channel,b.hasExactIdentity()?b.date:"unresolved_"+java.util.UUID.randomUUID(),b.time,b.cents,b.note);
                 JSONObject e=new JSONObject().put("id","s_"+key).put("sourceKey",key).put("source","scan").put("cents",b.cents).put("date",b.date).put("time",b.time).put("channel",b.channel).put("note",b.note).put("category","其他").put("dateHint",b.dateHint);e=validate(e,true);
                 if(dismissed.contains(key)||exact(entries,e)>=0||exact(pending,e)>=0){duplicates++;continue;}
                 if(pending.length()>=1000){overflow++;continue;}

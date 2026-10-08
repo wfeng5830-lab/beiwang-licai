@@ -80,9 +80,11 @@ test('quadrants support 36 distinct slots, reject collisions, and completion rel
 });
 
 
-test('scan readiness excludes incomplete dates and times from bulk confirmation',()=>{
+test('scan readiness requires date but allows absent time',()=>{
  const row={id:'scan_test',date:'2026-09-30',time:'12:30',cents:1800,channel:'alipay',category:'其他',note:'测试店铺',source:'scan'};
  assert.equal(C.scanReady(row),true);
- for(const missing of [{date:''},{time:''},{date:'2026-02-30'},{date:undefined}]){assert.equal(C.scanReady({...row,...missing}),false);assert.throws(()=>C.validateEntry({...row,...missing}));}
+ for(const missing of [{date:''},{time:'25:00'},{time:undefined},{time:null},{date:'2026-02-30'},{date:undefined}]){assert.equal(C.scanReady({...row,...missing}),false);assert.throws(()=>C.validateEntry({...row,...missing}));}
  assert.equal(C.scanReady({...row,date:'2024-02-29'}),true);
+ const noTime={...row,time:''};assert.equal(C.scanReady(noTime),true);assert.deepEqual(C.parseBackup(JSON.stringify({version:1,entries:[noTime]})),[noTime]);
+ assert.equal(C.sum(C.monthEntries([C.validateEntry(noTime)],'2026-09')),1800);
 });
