@@ -117,7 +117,7 @@ public final class BillScanService extends Service {
                     List<BillParser.Line> lines=new ArrayList<>();for(Text.TextBlock block:text.getTextBlocks())for(Text.Line line:block.getLines()){Rect r=line.getBoundingBox();if(r!=null)lines.add(new BillParser.Line(line.getText(),r.left,r.top,r.right,r.bottom));}
                     BillParser.Result parsed=BillParser.parseAuto(lines);
                     if(!parsed.pageRecognized||parsed.bills.isEmpty()){finish(token,"未识别到支出，请显示完整商户、金额和顶部搜索栏；受保护的黑屏无法扫描");return;}
-                    JSONObject result=new LedgerStore(this).scan(parsed.bills);finish(token,"新增 "+result.optInt("added")+" 笔，重复 "+result.optInt("duplicates")+" 笔"+(result.optInt("incomplete")>0?"，待补日期/时间 "+result.optInt("incomplete")+" 笔":"")+(result.optInt("conflicts")>0?"，疑似重复 "+result.optInt("conflicts")+" 笔":"")+(result.optInt("overflow")>0?"；队列已满，请先核对":""));
+                    JSONObject result=new LedgerStore(this).scan(parsed.bills);finish(token,"新增 "+result.optInt("added")+" 笔，重复 "+result.optInt("duplicates")+" 笔"+(result.optInt("incomplete")>0?"，待补日期 "+result.optInt("incomplete")+" 笔":"")+(result.optInt("conflicts")>0?"，疑似重复 "+result.optInt("conflicts")+" 笔":"")+(result.optInt("overflow")>0?"；队列已满，请先核对":""));
                 }catch(Exception e){finish(token,"保存失败，请检查存储空间后重试");}
             }).addOnFailureListener(error->finish(token,"文字识别失败，请重试")).addOnCompleteListener(task->bitmap.recycle());
         }catch(RuntimeException e){bitmap.recycle();finish(token,"识别组件暂不可用，请重新开启扫描");}

@@ -17,14 +17,15 @@ public final class BillParser {
         public final String date,time,note,channel,dateHint;public final long cents;
         public Bill(String d,String t,String n,String c,long a){this(d,t,n,c,a,"");}
         public Bill(String d,String t,String n,String c,long a,String hint){date=d;time=t;note=n;channel=c;cents=a;dateHint=hint;}
-        public boolean incomplete(){return date.isEmpty()||time.isEmpty();}
+        public boolean incomplete(){return date.isEmpty();}
+        public boolean hasExactIdentity(){return !date.isEmpty()&&!time.isEmpty();}
     }
     public static final class Result {
         public final List<Bill> bills;public final int ignored;public final boolean pageRecognized;public final String message;
         Result(List<Bill>b,int i,boolean p,String m){bills=b;ignored=i;pageRecognized=p;message=m;}
     }
     private static final Pattern HEADER=Pattern.compile("(20\\d{2})\\s*[年/-]\\s*(1[0-2]|0?[1-9])(?:\\s*月|(?=$|\\s))");
-    private static final Pattern DATE=Pattern.compile("(?<!\\d)(?:(20\\d{2})\\s*[年/.-]\\s*)?(1[0-2]|0?[1-9])\\s*[月/.-]\\s*(3[01]|[12]\\d|0?[1-9])(?:\\s*日)?(?!\\d)");
+    private static final Pattern DATE=Pattern.compile("(?<!\\d)(?:(20\\d{2})\\s*[年/.-]\\s*)?(1[0-2]|0?[1-9])\\s*[月/.-]\\s*(3[01]|[12]\\d|0?[1-9])(?!\\d)(?:\\s*日)?");
     private static final Pattern TIME=Pattern.compile("(?<!\\d)([01]?\\d|2[0-3])\\s*:\\s*([0-5]\\d)(?:\\s*:\\s*[0-5]\\d)?(?!\\d)");
     private static final Pattern AMOUNT=Pattern.compile("([+-])\\s*[¥￥]?\\s*((?:\\d{1,3}(?:,\\d{3})+|\\d{1,7})\\.\\d{2})(?![\\d.])");
     private static final Pattern EXCLUDE=Pattern.compile("退还|已退|退款|交易关闭|交易失败|支付失败|待付款|待支付|已取消|已撤销|部分退");
@@ -93,8 +94,18 @@ public final class BillParser {
                 // Dates are metadata below the title, not numbers embedded in merchant names.
                 boolean metadata=l.cy()>amount.cy()+h/2;
                 Matcher dm=DATE.matcher(t),tm=TIME.matcher(t);
-                boolean dated=metadata&&(dm.lookingAt()||t.startsWith("今天")||t.startsWith("昨天"));
-                if(dated){if(!rawDate.isEmpty()&&!rawDate.equals(t))ambiguousDate=true;else rawDate=t;}
+                // OCR may join a merchant/separator with its timestamp. Only accept a
+                // date in the metadata area with no trailing merchant text.
+                boolean matched=metadata&&dm.find()&&t.substring(dm.end()).trim().matches("(?:"+TIME.pattern()+")?");
+                boolean dated=matched||metadata&&(t.startsWith("今天")||t.startsWith("昨天"));
+                if(dated){
+                    String value=matched?t.substring(dm.start()):t;
+                    if(!rawDate.isEmpty()&&!rawDate.equals(value))ambiguousDate=true;else rawDate=value;
+                    if(matched&&dm.start()>0&&l.left<amount.left&&l.cy()<=amount.cy()+2*h){
+                        String prefix=t.substring(0,dm.start()).replaceAll("[\\p{P}\\p{S}\\s丨]+$","").trim();
+                        if(!prefix.isEmpty()&&!note.toString().equals(prefix)){if(note.length()>0)note.append(' ');note.append(prefix);}
+                    }
+                }
                 if(metadata&&tm.find()){String value=String.format(Locale.ROOT,"%02d:%s",Integer.parseInt(tm.group(1)),tm.group(2));if(!clock.isEmpty()&&!clock.equals(value))ambiguousTime=true;clock=value;}
                 if(dated||TIME.matcher(t).matches()||HEADER.matcher(t).matches()||amountLine(l)||t.matches(".*(账单|收入|支出|收支统计|查找交易|搜索交易记录|筛选).*"))continue;
                 if("alipay".equals(channel)&&metadata&&CATEGORY.matcher(t).matches())continue;
@@ -102,7 +113,12 @@ public final class BillParser {
             }
             if(note.length()==0){ignored++;continue;}
             String date=ambiguousDate?"":resolveDate(rawDate,lines,amount,today);
-            String hint=date.isEmpty()?(rawDate.isEmpty()?"未识别到日期":rawDate):"";
+            String hint="";
+            if(date.isEmpty()){
+                Matcher hintDate=DATE.matcher(rawDate);
+                hint=ambiguousDate?"发现多个日期，请核对":rawDate.isEmpty()?"未识别到日期":
+                    rawDate+(hintDate.lookingAt()&&hintDate.group(1)==null?"（缺少匹配的年份或月份）":"（日期无效，请核对）");
+            }
             if(hint.length()>80)hint=hint.substring(0,80);
             String merchant=note.toString().trim();if(merchant.length()>80)merchant=merchant.substring(0,80);
             bills.add(new Bill(date,ambiguousTime?"":clock,merchant,channel,cents,hint));

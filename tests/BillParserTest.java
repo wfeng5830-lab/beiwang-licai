@@ -74,6 +74,20 @@ public final class BillParserTest {
         List<BillParser.Line> combined=base();combined.add(line("合并文字测试店 -16.00",170,480,660));combined.add(line("9月6日 12:30",170,540,350));result=BillParser.parse(combined,"wechat","");check(result.bills.size()==1&&result.bills.get(0).cents==1600&&result.bills.get(0).note.equals("合并文字测试店"),"combined merchant/amount OCR line supported");
         List<BillParser.Line> mergedHeader=new ArrayList<>(Arrays.asList(line("账单",400,100,100),line("2026年9月 支出100.00",30,350,600)));row(mergedHeader,"测试店铺","9月6日 12:30","-8.00",480,null);result=BillParser.parse(mergedHeader,"wechat","");check(result.bills.get(0).date.equals("2026-09-06"),"month heading merged with summary supported");
         List<BillParser.Line> splitTime=base();row(splitTime,"测试店铺","9月6日","-8.00",480,null);splitTime.add(line("12:30",400,540,150));result=BillParser.parse(splitTime,"wechat","");check(result.bills.get(0).date.equals("2026-09-06")&&result.bills.get(0).time.equals("12:30"),"date and time split into OCR boxes supported");
+        List<BillParser.Line> prefix=base();row(prefix,"示例商户","示例商户 |9月27日13:54","-14.70",480,null);
+        result=BillParser.parse(prefix,"wechat","");
+        check(result.bills.get(0).date.equals("2026-09-27")&&result.bills.get(0).time.equals("13:54"),"merged merchant/date metadata extracts both fields");
+        check(result.bills.get(0).note.equals("示例商户"),"date text removed from merchant without duplicating title");
+        List<BillParser.Line> prefixOnly=base();prefixOnly.add(line("-14.70",735,480,100));prefixOnly.add(line("示例商户 |9月27日13:54",170,540,450));
+        result=BillParser.parse(prefixOnly,"wechat","");check(result.bills.size()==1&&result.bills.get(0).note.equals("示例商户")&&result.bills.get(0).date.equals("2026-09-27"),"merchant only present in merged metadata retained");
+        List<BillParser.Line> dateOnly=base();row(dateOnly,"测试店","|9月27日","-5.00",480,null);
+        result=BillParser.parse(dateOnly,"wechat","");check(!result.bills.get(0).incomplete()&&result.bills.get(0).time.isEmpty()&&!result.bills.get(0).hasExactIdentity(),"date-only bill bookable but not an exact duplicate identity");
+        List<BillParser.Line> noYear=new ArrayList<>(Arrays.asList(line("账单",400,100,100)));row(noYear,"测试店","测试店 |10月2日19:14","-45.00",480,null);
+        result=BillParser.parse(noYear,"wechat","");check(result.bills.get(0).date.isEmpty()&&result.bills.get(0).dateHint.contains("10月2日")&&result.bills.get(0).dateHint.contains("年份"),"missing year preserves observed month/day in hint");
+        List<BillParser.Line> nameDate=base();row(nameDate,"测试店","9月3日主题店","-8.00",480,null);
+        result=BillParser.parse(nameDate,"wechat","");check(result.bills.get(0).date.isEmpty(),"metadata merchant suffix is not a timestamp");
+        List<BillParser.Line> aliPrefix=base();aliRow(aliPrefix,"测试店","|2026-09-27","-5.00",480,"日用百货");
+        result=BillParser.parse(aliPrefix,"alipay","");check(result.bills.get(0).date.equals("2026-09-27")&&!result.bills.get(0).incomplete(),"Alipay date-only prefixed metadata supported");
         System.out.println("Bill parser: "+checks+" checks passed");
     }
     static void aliRow(List<BillParser.Line> rows,String merchant,String date,String amount,int y,String category){rows.add(line(merchant,155,y,475));rows.add(line(amount,695,y,130));rows.add(line(category,155,y+60,250));rows.add(line(date,155,y+120,330));}

@@ -17,7 +17,7 @@
     if (typeof e.id !== 'string' || !/^[a-zA-Z0-9_-]{1,100}$/.test(e.id)) throw new Error('账单编号不正确');
     if (!Number.isSafeInteger(e.cents) || e.cents <= 0 || e.cents > 999999999) throw new Error('账单金额不正确');
     if (!/^20\d\d-\d{2}-\d{2}$/.test(e.date) || dateKey(parseDate(e.date)) !== e.date) throw new Error('日期不正确');
-    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(e.time)) throw new Error('时间不正确');
+    if (typeof e.time !== 'string' || (e.time !== '' && !/^([01]\d|2[0-3]):[0-5]\d$/.test(e.time))) throw new Error('时间不正确');
     if (!['wechat','alipay','other'].includes(e.channel)) throw new Error('支付方式不正确');
     if (!['餐饮','购物','交通','生活缴费','娱乐','医疗','其他'].includes(e.category)) throw new Error('分类不正确');
     if (typeof e.note !== 'string' || e.note.length > 80) throw new Error('备注最多 80 字');
