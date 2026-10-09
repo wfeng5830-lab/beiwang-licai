@@ -117,6 +117,13 @@ public final class LedgerStoreTest {
         LedgerStore fillTime=new LedgerStore(new Memory());fillTime.scan(Arrays.asList(dateOnly));op=state(fillTime).getJSONArray("pending").getJSONObject(0);op.put("time","19:14");
         call(fillTime,"editCandidate",new JSONObject().put("id",op.getString("id")).put("entry",op));op=state(fillTime).getJSONArray("pending").getJSONObject(0);
         check(op.getString("sourceKey").equals(ScanIdentity.key("wechat","2026-10-02","19:14",4500,"日期完整测试店")),"optional time completion restores exact scan identity");
+        List<BillParser.Line> yearPage=new ArrayList<>(Arrays.asList(new BillParser.Line("账单",400,100,500,130),new BillParser.Line("10月",30,350,150,380),new BillParser.Line("测试餐厅",170,480,600,510),new BillParser.Line("-12.00",735,480,835,510),new BillParser.Line("10-02 13:55",170,540,520,570)));
+        BillParser.Result yearParsed=BillParser.parse(yearPage,"wechat","",java.time.LocalDate.of(2026,10,9));LedgerStore yearStore=new LedgerStore(new Memory());
+        check(yearStore.scan(yearParsed.bills).getInt("incomplete")==0,"parser default-year output queues without missing date");
+        JSONObject yp=state(yearStore).getJSONArray("pending").getJSONObject(0);
+        check(call(yearStore,"confirm",new JSONObject().put("id",yp.getString("id")).put("entry",yp)).getBoolean("ok"),"default-year scan can be confirmed directly");
+        check(state(yearStore).getJSONArray("entries").getJSONObject(0).getString("date").equals("2026-10-02"),"booked month/day is preserved with phone year");
+        check(yearStore.scan(yearParsed.bills).getInt("duplicates")==1,"default-year rescan uses normal exact deduplication");
         System.out.println("Ledger storage: "+checks+" checks passed");
     }
 }
