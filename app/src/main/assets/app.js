@@ -81,7 +81,7 @@ function settingsPage(){
   <section class="card settings-card"><div class="section-heading"><h2>悬浮扫描</h2><span class="pill">${scanner.connected?'扫描已开启':'未开启'}</span></div>
   <p class="settings-copy">自动识别微信 / 支付宝，无需无障碍。</p>
   ${native?`<button id="overlay-settings" class="secondary wide">${scanner.enabled?'悬浮窗权限已开启 · 管理':'允许显示悬浮窗'}</button><div class="button-row"><button id="start-scan" class="primary">开启扫描</button><button id="stop-scan" class="secondary">停止扫描</button></div>`:'<p class="settings-copy">扫描功能请在安卓应用中使用。</p>'}
-  <details class="settings-help"><summary>扫描使用说明</summary><p>允许悬浮窗，开启扫描并确认系统屏幕共享，再切到微信或支付宝账单页，停稳后点“扫描”。支付方式自动识别，无需切换。</p><p>自动读取账单日期；月日结合当前画面中的年份。“今天 / 昨天”按手机日期识别。日期缺失或年份不明会标注待补日期，请编辑补全后核对。只有日期、没有时间也可直接入账。</p><p>共享期间系统会显示提示；仅点击扫描时识别一帧，不保存截图或录屏，不上传。点悬浮窗 × 或“停止共享”结束。请勿在密码等敏感页面扫描。</p></details></section>
+  <details class="settings-help"><summary>扫描使用说明</summary><p>允许悬浮窗，开启扫描并确认系统屏幕共享，再切到微信或支付宝账单页，停稳后点“扫描”。支付方式自动识别，无需切换。</p><p>自动读取账单日期；页面有明确年份时优先使用，没有年份时默认按手机当前年份。历史账单可编辑年份。“今天 / 昨天”按手机日期识别。日期缺失、无效或与月份标题冲突时请编辑补全后核对。只有日期、没有时间也可直接入账。</p><p>共享期间系统会显示提示；仅点击扫描时识别一帧，不保存截图或录屏，不上传。点悬浮窗 × 或“停止共享”结束。请勿在密码等敏感页面扫描。</p></details></section>
   <section class="card settings-card" id="scan-queue"><div class="section-heading"><h2>扫描结果</h2><span class="pill">${state.pending.length} 笔待核对</span></div>
   ${fresh.length&&native?`<button id="confirm-scans" class="primary wide">核对全部 ${fresh.length} 笔新记录 · ¥${fmt(C.sum(fresh))}</button>`:''}
   ${state.pending.length?state.pending.map(p=>`<article class="pending-card"><div class="row"><span>${channels[p.channel]}<small>${escapeHTML(p.date||'待补日期')} ${escapeHTML(p.time||'')}</small></span><strong>¥${fmt(p.cents)}</strong></div><p>${escapeHTML(p.note)}</p>${!p.date?`<div class="notice warning">待补日期 · 请点编辑补全后入账${p.dateHint?`<br>识别到：${escapeHTML(p.dateHint)}`:''}<br>缺少日期时重复扫描可能再次出现，请一并核对。</div>`:''}${p.duplicateStatus==='possible'?`<div class="notice warning">疑似重复，请先比较已有记录。<label class="checkbox-label"><input type="checkbox" data-force-id="${escapeHTML(p.id)}">这是另一笔消费，仍然入账</label></div>`:''}<div class="button-row"><button class="secondary" data-dismiss="${escapeHTML(p.id)}">忽略</button><button class="secondary" data-edit-scan="${escapeHTML(p.id)}">编辑</button><button class="primary" data-accept="${escapeHTML(p.id)}" ${C.scanReady(p)?'':'disabled'}>核对</button></div></article>`).join(''):'<p class="settings-copy queue-empty">暂无待核对记录</p>'}</section>
@@ -89,7 +89,7 @@ function settingsPage(){
   <section class="card settings-card"><div class="section-heading"><h2>桌面四象限图标</h2><span class="pill">${desktop.pinned?'已添加':'未添加'}</span></div>
   ${native?`<p class="settings-copy" role="status">${escapeHTML(desktop.message)}</p>${desktop.supported||desktop.pinned?`<div class="button-row">${desktop.pinned?'<button class="secondary" id="refresh-desktop-icon">刷新图标</button>':'<button class="primary" id="add-desktop-icon">添加到桌面</button>'}</div>`:'<p class="settings-copy">当前桌面不支持添加快捷图标。</p>'}`:'<p class="settings-copy">安装安卓应用后可添加桌面快捷图标。</p>'}
   <details class="settings-help"><summary>图标使用说明</summary><p>每个象限：一件待办显示大字，多件显示四小格，按格子顺序展示前四件，多出的数量用 + 标注。全部清空后恢复默认图案。</p><p>只有“重要且紧急”象限有未完成事项，点击图标才进入四象限；其他情况打开账单花销。</p><p>首次添加需在系统弹窗确认。这是新增快捷图标，原图标保留，可手动从桌面移走，无需卸载。小应用标记、样式与刷新速度由手机桌面决定。</p></details></section>
-  <p class="subtle" style="text-align:center">日常账本 1.6.3 · 本机保存</p>`;
+  <p class="subtle" style="text-align:center">日常账本 1.6.4 · 本机保存</p>`;
 }
 function fitDayAmounts(){
   const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');if(!ctx)return;

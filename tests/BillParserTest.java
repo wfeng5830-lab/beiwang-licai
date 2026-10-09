@@ -23,7 +23,8 @@ public final class BillParserTest {
         check(result.bills.get(2).note.contains("蒋娜2.13"),"numeric merchant");
         List<BillParser.Line> plain=new ArrayList<>(l);plain.removeIf(x->x.text.equals("账单"));check(!BillParser.parse(plain,"wechat","2026-09").pageRecognized,"chat rejected");
         List<BillParser.Line> missing=new ArrayList<>(Arrays.asList(line("账单",400,100,100)));row(missing,"超市","9月6日 18:07","-23.50",480,null);
-        check(BillParser.parse(missing,"wechat","").bills.get(0).date.isEmpty(),"missing year retained for review");check(BillParser.parse(missing,"wechat","2026-09").bills.get(0).date.isEmpty(),"saved month cannot invent year");check(BillParser.parse(missing,"wechat","2026-08").bills.size()==1,"wrong saved month cannot drop row");
+        java.time.LocalDate scanDay=java.time.LocalDate.of(2026,10,9);
+        check(BillParser.parse(missing,"wechat","",scanDay).bills.get(0).date.equals("2026-09-06"),"missing year uses phone scan year");check(BillParser.parse(missing,"wechat","2025-09",scanDay).bills.get(0).date.equals("2026-09-06"),"saved month cannot override phone scan year");check(BillParser.parse(missing,"wechat","2026-08",scanDay).bills.size()==1,"wrong saved month cannot drop row");
         List<BillParser.Line> ali=new ArrayList<>(Arrays.asList(line("账单",400,100,100)));row(ali,"便利店","2026-09-08 12:31","-12.30",480,null);
         check(BillParser.parse(ali,"alipay","").bills.size()==1,"alipay full date");
         List<BillParser.Line> malformed=base();row(malformed,"早餐","9月6日 18:07","-1.234",480,null);check(BillParser.parse(malformed,"wechat","").bills.isEmpty(),"three decimals rejected");
@@ -83,11 +84,24 @@ public final class BillParserTest {
         List<BillParser.Line> dateOnly=base();row(dateOnly,"测试店","|9月27日","-5.00",480,null);
         result=BillParser.parse(dateOnly,"wechat","");check(!result.bills.get(0).incomplete()&&result.bills.get(0).time.isEmpty()&&!result.bills.get(0).hasExactIdentity(),"date-only bill bookable but not an exact duplicate identity");
         List<BillParser.Line> noYear=new ArrayList<>(Arrays.asList(line("账单",400,100,100)));row(noYear,"测试店","测试店 |10月2日19:14","-45.00",480,null);
-        result=BillParser.parse(noYear,"wechat","");check(result.bills.get(0).date.isEmpty()&&result.bills.get(0).dateHint.contains("10月2日")&&result.bills.get(0).dateHint.contains("年份"),"missing year preserves observed month/day in hint");
+        result=BillParser.parse(noYear,"wechat","",scanDay);check(result.bills.get(0).date.equals("2026-10-02")&&result.bills.get(0).time.equals("19:14")&&result.bills.get(0).dateHint.isEmpty(),"merged month/day uses scan year without blocking warning");
         List<BillParser.Line> nameDate=base();row(nameDate,"测试店","9月3日主题店","-8.00",480,null);
         result=BillParser.parse(nameDate,"wechat","");check(result.bills.get(0).date.isEmpty(),"metadata merchant suffix is not a timestamp");
         List<BillParser.Line> aliPrefix=base();aliRow(aliPrefix,"测试店","|2026-09-27","-5.00",480,"日用百货");
         result=BillParser.parse(aliPrefix,"alipay","");check(result.bills.get(0).date.equals("2026-09-27")&&!result.bills.get(0).incomplete(),"Alipay date-only prefixed metadata supported");
+        List<BillParser.Line> monthOnlyAli=new ArrayList<>(Arrays.asList(line("搜索交易记录",160,130,350),line("全部 支出 转账 退款 筛选",25,250,800),line("10月",25,350,200),line("收支分析",660,410,170)));
+        aliRow(monthOnlyAli,"测试充值","10-03 13:55","-9.10",480,"充值缴费");aliRow(monthOnlyAli,"测试餐饮","10-02 03:41","-15.88",750,"餐饮美食");
+        result=BillParser.parseAuto(monthOnlyAli,"",scanDay);
+        check(result.bills.size()==2&&result.bills.get(0).date.equals("2026-10-03")&&result.bills.get(1).date.equals("2026-10-02"),"Alipay month-only heading resolves both month/day rows");
+        check(result.bills.stream().allMatch(b->!b.incomplete()&&b.channel.equals("alipay")&&b.dateHint.isEmpty()),"defaulted dates are ready for review without missing-date warning");
+        List<BillParser.Line> historical=new ArrayList<>(Arrays.asList(line("账单",400,100,100),line("2024年10月",30,350,250)));row(historical,"历史测试店","10月2日","-5.00",480,null);
+        result=BillParser.parse(historical,"wechat","",scanDay);check(result.bills.get(0).date.equals("2024-10-02")&&result.bills.get(0).time.isEmpty(),"explicit historical page year wins and time stays optional");
+        row(historical,"完整年月日测试店","2023-10-01 12:00","-6.00",700,null);result=BillParser.parse(historical,"wechat","",scanDay);check(result.bills.get(1).date.equals("2023-10-01"),"full row year wins over explicit page year and phone year");
+        List<BillParser.Line> leap=new ArrayList<>(Arrays.asList(line("账单",400,100,100)));row(leap,"闰日测试店","02-29","-1.00",480,null);
+        result=BillParser.parse(leap,"wechat","",java.time.LocalDate.of(2024,3,1));check(result.bills.get(0).date.equals("2024-02-29")&&result.bills.get(0).time.isEmpty(),"default year supports valid leap day without time");
+        result=BillParser.parse(leap,"wechat","",scanDay);check(result.bills.get(0).date.isEmpty()&&result.bills.get(0).dateHint.contains("日期无效"),"invalid day in current year still needs correction");
+        List<BillParser.Line> yearBoundary=new ArrayList<>(Arrays.asList(line("账单",400,100,100)));row(yearBoundary,"跨年测试店","12月31日 18:00","-2.00",480,null);
+        result=BillParser.parse(yearBoundary,"wechat","",java.time.LocalDate.of(2027,1,1));check(result.bills.get(0).date.equals("2027-12-31"),"default is scan year without silently guessing previous year");
         System.out.println("Bill parser: "+checks+" checks passed");
     }
     static void aliRow(List<BillParser.Line> rows,String merchant,String date,String amount,int y,String category){rows.add(line(merchant,155,y,475));rows.add(line(amount,695,y,130));rows.add(line(category,155,y+60,250));rows.add(line(date,155,y+120,330));}

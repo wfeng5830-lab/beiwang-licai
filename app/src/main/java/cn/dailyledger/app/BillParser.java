@@ -115,9 +115,8 @@ public final class BillParser {
             String date=ambiguousDate?"":resolveDate(rawDate,lines,amount,today);
             String hint="";
             if(date.isEmpty()){
-                Matcher hintDate=DATE.matcher(rawDate);
                 hint=ambiguousDate?"发现多个日期，请核对":rawDate.isEmpty()?"未识别到日期":
-                    rawDate+(hintDate.lookingAt()&&hintDate.group(1)==null?"（缺少匹配的年份或月份）":"（日期无效，请核对）");
+                    rawDate+"（日期无效或与月份标题不符，请核对）";
             }
             if(hint.length()>80)hint=hint.substring(0,80);
             String merchant=note.toString().trim();if(merchant.length()>80)merchant=merchant.substring(0,80);
@@ -133,7 +132,10 @@ public final class BillParser {
         if(year==null){
             String headerYear=null;int headerMonth=0;
             for(Line line:lines){if(line.top>=amount.top)break;Matcher hm=HEADER.matcher(line.text.trim());if(hm.lookingAt()&&!DATE.matcher(line.text).find()){headerYear=hm.group(1);headerMonth=Integer.parseInt(hm.group(2));}}
-            if(headerYear==null||headerMonth!=month)return "";year=headerYear;
+            // A month/day without an explicit page year uses the phone's scan year.
+            // Keep a conflicting explicit heading for review rather than override it.
+            if(headerYear!=null&&headerMonth!=month)return "";
+            year=headerYear==null?String.valueOf(today.getYear()):headerYear;
         }
         try{return LocalDate.of(Integer.parseInt(year),month,day).toString();}catch(Exception e){return "";}
     }
