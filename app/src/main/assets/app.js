@@ -63,7 +63,12 @@ function statsPage(){
 let memoView='list',pendingSlot=-1;
 const quadrantNames=['重要且紧急','重要不紧急','紧急不重要','不紧急不重要'];
 const memoMark=m=>m.mark||Array.from(C.memoText(m).trim())[0]||'事';
-function memoRow(m){return `<div class="todo-row ${m.done?'completed':''}"><button class="todo-check" data-toggle-memo="${escapeHTML(m.id)}" aria-label="${m.done?'恢复':'完成'}：${escapeHTML(C.memoText(m))}" aria-pressed="${m.done}">${m.done?'✓':''}</button><button class="todo-text" data-edit-memo="${escapeHTML(m.id)}">${escapeHTML(C.memoText(m))}</button>${m.slot>=0?`<span class="todo-tag q${Math.floor(m.slot/9)}">${escapeHTML(memoMark(m))}</span>`:''}${!m.done&&memoView==='matrix'?`<button class="drag-handle" data-drag-memo="${escapeHTML(m.id)}" aria-label="拖动事项">⠿</button>`:''}</div>`;}
+function memoTag(m){
+ const q=Math.floor(m.slot/9);
+ if(q<0)return memoView==='matrix'?'<span class="todo-tag unassigned" aria-hidden="true"></span>':'';
+ return `<span class="todo-tag q${q}" aria-label="所属象限：${quadrantNames[q]}">${q<2?'重要':'不重要'}<br>${q%2===0?'紧急':'不紧急'}</span>`;
+}
+function memoRow(m){return `<div class="todo-row ${m.done?'completed':''}"><button class="todo-check" data-toggle-memo="${escapeHTML(m.id)}" aria-label="${m.done?'恢复':'完成'}：${escapeHTML(C.memoText(m))}" aria-pressed="${m.done}">${m.done?'✓':''}</button><button class="todo-text" data-edit-memo="${escapeHTML(m.id)}">${escapeHTML(C.memoText(m))}</button>${memoTag(m)}${!m.done&&memoView==='matrix'?`<button class="drag-handle" data-drag-memo="${escapeHTML(m.id)}" aria-label="拖动事项">⠿</button>`:''}</div>`;}
 function memosPage(){
  const active=state.memos.filter(m=>!m.done),done=state.memos.filter(m=>m.done).sort((a,b)=>a.completedAt-b.completedAt);
  const board=`<div class="quadrant-board">${quadrantNames.map((name,q)=>`<section class="quadrant q${q}"><h3>${name}<small>${active.filter(m=>Math.floor(m.slot/9)===q).length}/9</small></h3><div class="quadrant-grid">${Array.from({length:9},(_,i)=>{const slot=q*9+i,m=active.find(m=>m.slot===slot);return `<button class="quadrant-cell ${m?'filled':''}" data-slot="${slot}" ${m?`data-drag-memo="${escapeHTML(m.id)}"`:''} aria-label="${name} 第${i+1}格：${m?escapeHTML(C.memoText(m)):'空格，添加事项'}">${m?`<strong>${escapeHTML(memoMark(m))}</strong><small>${escapeHTML(C.memoText(m).replace(/\s/g,'').slice(0,4))}</small>`:'＋'}</button>`;}).join('')}</div></section>`).join('')}</div>`;
@@ -89,7 +94,7 @@ function settingsPage(){
   <section class="card settings-card"><div class="section-heading"><h2>桌面四象限图标</h2><span class="pill">${desktop.pinned?'已添加':'未添加'}</span></div>
   ${native?`<p class="settings-copy" role="status">${escapeHTML(desktop.message)}</p>${desktop.supported||desktop.pinned?`<div class="button-row">${desktop.pinned?'<button class="secondary" id="refresh-desktop-icon">刷新图标</button>':'<button class="primary" id="add-desktop-icon">添加到桌面</button>'}</div>`:'<p class="settings-copy">当前桌面不支持添加快捷图标。</p>'}`:'<p class="settings-copy">安装安卓应用后可添加桌面快捷图标。</p>'}
   <details class="settings-help"><summary>图标使用说明</summary><p>每个象限：一件待办显示大字，多件显示四小格，按格子顺序展示前四件，多出的数量用 + 标注。全部清空后恢复默认图案。</p><p>只有“重要且紧急”象限有未完成事项，点击图标才进入四象限；其他情况打开账单花销。</p><p>首次添加需在系统弹窗确认。这是新增快捷图标，原图标保留，可手动从桌面移走，无需卸载。小应用标记、样式与刷新速度由手机桌面决定。</p></details></section>
-  <p class="subtle" style="text-align:center">日常账本 1.6.4 · 本机保存</p>`;
+  <p class="subtle" style="text-align:center">日常账本 1.6.5 · 本机保存</p>`;
 }
 function fitDayAmounts(){
   const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');if(!ctx)return;
@@ -97,6 +102,10 @@ function fitDayAmounts(){
 }
 window.addEventListener('resize',fitDayAmounts);
 function render(){
+  // The tray is an independent scroller. Rebuilding main must not reset it
+  // after a drop, edit, or native refresh while staying in the matrix view.
+  const tray=page==='memos'&&memoView==='matrix'?document.querySelector('.task-tray'):null;
+  const memoScroll=tray?{top:tray.scrollTop,left:tray.scrollLeft,x:window.scrollX,y:window.scrollY}:null;
   $('main').innerHTML=(storageError?`<div class="notice warning" role="alert">${escapeHTML(storageError)}</div>`:'')+(page==='calendar'?calendarPage():page==='memos'?memosPage():settingsPage());
   document.querySelectorAll('.bottom-nav button').forEach(b=>{b.classList.toggle('active',b.dataset.page===page);b.setAttribute('aria-current',b.dataset.page===page?'page':'false');});
   $('add-top').hidden=page!=='calendar';
@@ -111,6 +120,7 @@ function render(){
   $('export')?.addEventListener('click',exportBackup);
   $('import')?.addEventListener('click',()=>native?AndroidLedger.importBackup():$('import-file').click());
   $('import-file')?.addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;if(file.size>20000000){toast('备份文件不能超过 20 MB');return;}try{prepareImport(await file.text());}catch(error){toast(error.message);}e.target.value='';});
+  if(memoScroll){const next=document.querySelector('.task-tray');next.scrollTop=memoScroll.top;next.scrollLeft=memoScroll.left;window.scrollTo(memoScroll.x,memoScroll.y);}
 }
 function openEntry(entry=null,date=selectedDate,candidate=null){
   candidateEditing=candidate;editingSourceKey=entry?.sourceKey;$('entry-form').reset();$('form-error').textContent='';$('duplicate-review').hidden=true;
