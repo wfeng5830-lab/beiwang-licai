@@ -1,0 +1,9 @@
+<!-- Lucide GripVertical (ISC); license in assets/lucide-LICENSE.txt -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#00000000" android:strokeColor="#235EE8" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M9,11 a1,1 0,1 0,0,2 a1,1 0,1 0,0,-2" />
+    <path android:fillColor="#00000000" android:strokeColor="#235EE8" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M9,4 a1,1 0,1 0,0,2 a1,1 0,1 0,0,-2" />
+    <path android:fillColor="#00000000" android:strokeColor="#235EE8" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M9,18 a1,1 0,1 0,0,2 a1,1 0,1 0,0,-2" />
+    <path android:fillColor="#00000000" android:strokeColor="#235EE8" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M15,11 a1,1 0,1 0,0,2 a1,1 0,1 0,0,-2" />
+    <path android:fillColor="#00000000" android:strokeColor="#235EE8" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M15,4 a1,1 0,1 0,0,2 a1,1 0,1 0,0,-2" />
+    <path android:fillColor="#00000000" android:strokeColor="#235EE8" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M15,18 a1,1 0,1 0,0,2 a1,1 0,1 0,0,-2" />
+</vector>

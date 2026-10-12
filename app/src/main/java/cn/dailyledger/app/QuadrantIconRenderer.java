@@ -13,7 +13,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 
 final class QuadrantIconRenderer {
-    private static final int[] COLORS = {0xfff6d9d3, 0xffd3e9df, 0xfff5e7c5, 0xffdce4f0};
+    private static final int[] COLORS = {0xfffff2f1, 0xffeef3ff, 0xfffff7e8, 0xfff3f5f8};
     private QuadrantIconRenderer() {}
     // minSdk 26 natively supports this bundled vector; no AppCompat dependency is needed.
     @SuppressLint("UseCompatLoadingForDrawables")
@@ -30,11 +30,11 @@ final class QuadrantIconRenderer {
         Path clip = new Path();
         clip.addRoundRect(new RectF(0, 0, size, size), 44, 44, Path.Direction.CW);
         canvas.clipPath(clip);
-        canvas.drawColor(0xfff9f8f2);
+        canvas.drawColor(Color.WHITE);
         for (int q = 0; q < 4; q++) {
             float left = 12 + (q % 2) * 87, top = 12 + (q / 2) * 87;
             RectF tile = new RectF(left, top, left + 81, top + 81);
-            paint.setColor(model.count(q) == 0 ? 0xffedf2ef : COLORS[q]);
+            paint.setColor(model.count(q) == 0 ? 0xfff5f7fa : COLORS[q]);
             canvas.drawRoundRect(tile, 6, 6, paint);
             if (model.count(q) == 1) {
                 letter(canvas, paint, model.mark(q, 0), tile, 59);
@@ -47,7 +47,7 @@ final class QuadrantIconRenderer {
                 }
                 if (model.overflow(q) > 0) {
                     RectF badge = new RectF(tile.right - 27, tile.bottom - 19, tile.right + 2, tile.bottom + 2);
-                    paint.setColor(0xfff9f8f2);canvas.drawRoundRect(badge, 5, 5, paint);
+                    paint.setColor(Color.WHITE);canvas.drawRoundRect(badge, 5, 5, paint);
                     letter(canvas, paint, "+" + model.overflow(q), badge, 18);
                 }
             }
@@ -55,7 +55,7 @@ final class QuadrantIconRenderer {
         return bitmap;
     }
     private static void letter(Canvas canvas, Paint paint, String value, RectF box, float size) {
-        paint.setColor(Color.rgb(23, 51, 43));
+        paint.setColor(Color.rgb(23, 33, 47));
         paint.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         paint.setTextSize(size);
         float width = paint.measureText(value);

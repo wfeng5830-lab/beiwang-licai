@@ -4,7 +4,7 @@ const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),
 const assets=path.resolve(__dirname,'../app/src/main/assets');
 (async()=>{
  const server=http.createServer((req,res)=>{
-  const file=({'/':'index.html','/app.js':'app.js','/core.js':'core.js','/style.css':'style.css'})[req.url];
+  const file=({'/':'index.html','/icons.js':'icons.js','/ui.js':'ui.js','/app.js':'app.js','/core.js':'core.js','/style.css':'style.css'})[req.url];
   if(!file){res.writeHead(404);return res.end();}
   res.setHeader('Content-Type',file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html; charset=utf-8');res.end(fs.readFileSync(path.join(assets,file)));
  });

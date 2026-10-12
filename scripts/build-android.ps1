@@ -8,7 +8,9 @@ if (!(Test-Path -LiteralPath (Join-Path $sdkPath 'platforms/android-35/android.j
 $env:ANDROID_HOME = $sdkPath
 $env:GRADLE_USER_HOME = Join-Path $projectRoot '.tools/gradle-cache'
 if (Test-Path -LiteralPath 'C:/Program Files/Java/jdk-21') { $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21' }
-& $gradlePath --no-daemon assembleDebug
+$debugSigningKey = Join-Path ([Environment]::GetFolderPath('UserProfile')) '.android/debug.keystore'
+if (!(Test-Path -LiteralPath $debugSigningKey)) { throw '缺少原调试签名文件，请恢复旧签名后构建，以免新版无法覆盖安装。' }
+& $gradlePath --no-daemon "-PledgerDebugKeystore=$debugSigningKey" assembleDebug
 if ($LASTEXITCODE -ne 0) { throw 'Android 构建失败，请查看以上错误。' }
 New-Item -ItemType Directory -Force (Join-Path $projectRoot 'output') | Out-Null
 $appVersion = (Get-Content -Raw -LiteralPath (Join-Path $projectRoot 'package.json') | ConvertFrom-Json).version
