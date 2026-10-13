@@ -64,7 +64,7 @@ final class DesktopShortcut {
             ShortcutManager manager = context.getSystemService(ShortcutManager.class);
             if (manager == null || !pinned(manager)) { prefs(context).edit().remove("fingerprint").remove("message").apply(); return; }
             QuadrantIconModel current = model(context);
-            String fingerprint = "v1:" + current.fingerprint();
+            String fingerprint = "classic-v2:" + current.fingerprint();
             if (!force && fingerprint.equals(prefs(context).getString("fingerprint", ""))) return;
             if (manager.updateShortcuts(Collections.singletonList(shortcut(context,current)))) {
                 prefs(context).edit().putString("fingerprint",fingerprint)

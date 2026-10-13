@@ -1,0 +1,1007 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-13T00:17:51.1225637Z",
+  "title": "Design System: 日常账本",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "主蓝",
+        "tonalRamp": [
+          "oklch(15% 0.218 263.3)",
+          "oklch(27% 0.218 263.3)",
+          "oklch(38% 0.218 263.3)",
+          "oklch(49% 0.218 263.3)",
+          "oklch(61% 0.218 263.3)",
+          "oklch(72% 0.218 263.3)",
+          "oklch(84% 0.218 263.3)",
+          "oklch(95% 0.218 263.3)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "bg": {
+        "role": "neutral",
+        "displayName": "淡灰页面",
+        "tonalRamp": [
+          "oklch(15% 0.007 268.5)",
+          "oklch(27% 0.007 268.5)",
+          "oklch(38% 0.007 268.5)",
+          "oklch(49% 0.007 268.5)",
+          "oklch(61% 0.007 268.5)",
+          "oklch(72% 0.007 268.5)",
+          "oklch(84% 0.007 268.5)",
+          "oklch(95% 0.007 268.5)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "day-medium": {
+        "role": "primary",
+        "displayName": "中金额日期",
+        "tonalRamp": [
+          "oklch(15% 0.026 264.4)",
+          "oklch(27% 0.026 264.4)",
+          "oklch(38% 0.026 264.4)",
+          "oklch(49% 0.026 264.4)",
+          "oklch(61% 0.026 264.4)",
+          "oklch(72% 0.026 264.4)",
+          "oklch(84% 0.026 264.4)",
+          "oklch(95% 0.026 264.4)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "day-high": {
+        "role": "primary",
+        "displayName": "高金额日期",
+        "tonalRamp": [
+          "oklch(15% 0.038 264.4)",
+          "oklch(27% 0.038 264.4)",
+          "oklch(38% 0.038 264.4)",
+          "oklch(49% 0.038 264.4)",
+          "oklch(61% 0.038 264.4)",
+          "oklch(72% 0.038 264.4)",
+          "oklch(84% 0.038 264.4)",
+          "oklch(95% 0.038 264.4)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "wechat": {
+        "role": "semantic",
+        "displayName": "微信支付",
+        "tonalRamp": [
+          "oklch(15% 0.099 170.9)",
+          "oklch(27% 0.099 170.9)",
+          "oklch(38% 0.099 170.9)",
+          "oklch(49% 0.099 170.9)",
+          "oklch(61% 0.099 170.9)",
+          "oklch(72% 0.099 170.9)",
+          "oklch(84% 0.099 170.9)",
+          "oklch(95% 0.099 170.9)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "q0-bg": {
+        "role": "semantic",
+        "displayName": "重要且紧急",
+        "tonalRamp": [
+          "oklch(15% 0.014 22.8)",
+          "oklch(27% 0.014 22.8)",
+          "oklch(38% 0.014 22.8)",
+          "oklch(49% 0.014 22.8)",
+          "oklch(61% 0.014 22.8)",
+          "oklch(72% 0.014 22.8)",
+          "oklch(84% 0.014 22.8)",
+          "oklch(95% 0.014 22.8)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "q1-bg": {
+        "role": "semantic",
+        "displayName": "重要不紧急",
+        "tonalRamp": [
+          "oklch(15% 0.017 267.8)",
+          "oklch(27% 0.017 267.8)",
+          "oklch(38% 0.017 267.8)",
+          "oklch(49% 0.017 267.8)",
+          "oklch(61% 0.017 267.8)",
+          "oklch(72% 0.017 267.8)",
+          "oklch(84% 0.017 267.8)",
+          "oklch(95% 0.017 267.8)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "q2-bg": {
+        "role": "semantic",
+        "displayName": "紧急不重要",
+        "tonalRamp": [
+          "oklch(15% 0.022 83.3)",
+          "oklch(27% 0.022 83.3)",
+          "oklch(38% 0.022 83.3)",
+          "oklch(49% 0.022 83.3)",
+          "oklch(61% 0.022 83.3)",
+          "oklch(72% 0.022 83.3)",
+          "oklch(84% 0.022 83.3)",
+          "oklch(95% 0.022 83.3)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "q3-bg": {
+        "role": "semantic",
+        "displayName": "不紧急不重要",
+        "tonalRamp": [
+          "oklch(15% 0.005 258.3)",
+          "oklch(27% 0.005 258.3)",
+          "oklch(38% 0.005 258.3)",
+          "oklch(49% 0.005 258.3)",
+          "oklch(61% 0.005 258.3)",
+          "oklch(72% 0.005 258.3)",
+          "oklch(84% 0.005 258.3)",
+          "oklch(95% 0.005 258.3)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "primary-dark": {
+        "role": "primary",
+        "displayName": "primary-dark",
+        "tonalRamp": [
+          "oklch(15% 0.184 263.6)",
+          "oklch(27% 0.184 263.6)",
+          "oklch(38% 0.184 263.6)",
+          "oklch(49% 0.184 263.6)",
+          "oklch(61% 0.184 263.6)",
+          "oklch(72% 0.184 263.6)",
+          "oklch(84% 0.184 263.6)",
+          "oklch(95% 0.184 263.6)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "ink",
+        "tonalRamp": [
+          "oklch(15% 0.030 256.9)",
+          "oklch(27% 0.030 256.9)",
+          "oklch(38% 0.030 256.9)",
+          "oklch(49% 0.030 256.9)",
+          "oklch(61% 0.030 256.9)",
+          "oklch(72% 0.030 256.9)",
+          "oklch(84% 0.030 256.9)",
+          "oklch(95% 0.030 256.9)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "muted",
+        "tonalRamp": [
+          "oklch(15% 0.035 258.9)",
+          "oklch(27% 0.035 258.9)",
+          "oklch(38% 0.035 258.9)",
+          "oklch(49% 0.035 258.9)",
+          "oklch(61% 0.035 258.9)",
+          "oklch(72% 0.035 258.9)",
+          "oklch(84% 0.035 258.9)",
+          "oklch(95% 0.035 258.9)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "line",
+        "tonalRamp": [
+          "oklch(15% 0.009 258.3)",
+          "oklch(27% 0.009 258.3)",
+          "oklch(38% 0.009 258.3)",
+          "oklch(49% 0.009 258.3)",
+          "oklch(61% 0.009 258.3)",
+          "oklch(72% 0.009 258.3)",
+          "oklch(84% 0.009 258.3)",
+          "oklch(95% 0.009 258.3)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "surface",
+        "tonalRamp": [
+          "oklch(15% 0.000 0.0)",
+          "oklch(27% 0.000 0.0)",
+          "oklch(38% 0.000 0.0)",
+          "oklch(49% 0.000 0.0)",
+          "oklch(61% 0.000 0.0)",
+          "oklch(72% 0.000 0.0)",
+          "oklch(84% 0.000 0.0)",
+          "oklch(95% 0.000 0.0)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "soft": {
+        "role": "primary",
+        "displayName": "soft",
+        "tonalRamp": [
+          "oklch(15% 0.017 264.5)",
+          "oklch(27% 0.017 264.5)",
+          "oklch(38% 0.017 264.5)",
+          "oklch(49% 0.017 264.5)",
+          "oklch(61% 0.017 264.5)",
+          "oklch(72% 0.017 264.5)",
+          "oklch(84% 0.017 264.5)",
+          "oklch(95% 0.017 264.5)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "focus": {
+        "role": "neutral",
+        "displayName": "focus",
+        "tonalRamp": [
+          "oklch(15% 0.138 264.2)",
+          "oklch(27% 0.138 264.2)",
+          "oklch(38% 0.138 264.2)",
+          "oklch(49% 0.138 264.2)",
+          "oklch(61% 0.138 264.2)",
+          "oklch(72% 0.138 264.2)",
+          "oklch(84% 0.138 264.2)",
+          "oklch(95% 0.138 264.2)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "card-border": {
+        "role": "neutral",
+        "displayName": "card-border",
+        "tonalRamp": [
+          "oklch(15% 0.010 261.8)",
+          "oklch(27% 0.010 261.8)",
+          "oklch(38% 0.010 261.8)",
+          "oklch(49% 0.010 261.8)",
+          "oklch(61% 0.010 261.8)",
+          "oklch(72% 0.010 261.8)",
+          "oklch(84% 0.010 261.8)",
+          "oklch(95% 0.010 261.8)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "input-border": {
+        "role": "neutral",
+        "displayName": "input-border",
+        "tonalRamp": [
+          "oklch(15% 0.018 256.3)",
+          "oklch(27% 0.018 256.3)",
+          "oklch(38% 0.018 256.3)",
+          "oklch(49% 0.018 256.3)",
+          "oklch(61% 0.018 256.3)",
+          "oklch(72% 0.018 256.3)",
+          "oklch(84% 0.018 256.3)",
+          "oklch(95% 0.018 256.3)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "summary-caption": {
+        "role": "neutral",
+        "displayName": "summary-caption",
+        "tonalRamp": [
+          "oklch(15% 0.030 267.2)",
+          "oklch(27% 0.030 267.2)",
+          "oklch(38% 0.030 267.2)",
+          "oklch(49% 0.030 267.2)",
+          "oklch(61% 0.030 267.2)",
+          "oklch(72% 0.030 267.2)",
+          "oklch(84% 0.030 267.2)",
+          "oklch(95% 0.030 267.2)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "secondary-ink": {
+        "role": "neutral",
+        "displayName": "secondary-ink",
+        "tonalRamp": [
+          "oklch(15% 0.164 262.6)",
+          "oklch(27% 0.164 262.6)",
+          "oklch(38% 0.164 262.6)",
+          "oklch(49% 0.164 262.6)",
+          "oklch(61% 0.164 262.6)",
+          "oklch(72% 0.164 262.6)",
+          "oklch(84% 0.164 262.6)",
+          "oklch(95% 0.164 262.6)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "secondary-hover": {
+        "role": "neutral",
+        "displayName": "secondary-hover",
+        "tonalRamp": [
+          "oklch(15% 0.034 263.6)",
+          "oklch(27% 0.034 263.6)",
+          "oklch(38% 0.034 263.6)",
+          "oklch(49% 0.034 263.6)",
+          "oklch(61% 0.034 263.6)",
+          "oklch(72% 0.034 263.6)",
+          "oklch(84% 0.034 263.6)",
+          "oklch(95% 0.034 263.6)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "day-empty": {
+        "role": "primary",
+        "displayName": "day-empty",
+        "tonalRamp": [
+          "oklch(15% 0.005 258.3)",
+          "oklch(27% 0.005 258.3)",
+          "oklch(38% 0.005 258.3)",
+          "oklch(49% 0.005 258.3)",
+          "oklch(61% 0.005 258.3)",
+          "oklch(72% 0.005 258.3)",
+          "oklch(84% 0.005 258.3)",
+          "oklch(95% 0.005 258.3)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "day-hover": {
+        "role": "primary",
+        "displayName": "day-hover",
+        "tonalRamp": [
+          "oklch(15% 0.048 262.0)",
+          "oklch(27% 0.048 262.0)",
+          "oklch(38% 0.048 262.0)",
+          "oklch(49% 0.048 262.0)",
+          "oklch(61% 0.048 262.0)",
+          "oklch(72% 0.048 262.0)",
+          "oklch(84% 0.048 262.0)",
+          "oklch(95% 0.048 262.0)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "day-amount": {
+        "role": "primary",
+        "displayName": "day-amount",
+        "tonalRamp": [
+          "oklch(15% 0.099 259.6)",
+          "oklch(27% 0.099 259.6)",
+          "oklch(38% 0.099 259.6)",
+          "oklch(49% 0.099 259.6)",
+          "oklch(61% 0.099 259.6)",
+          "oklch(72% 0.099 259.6)",
+          "oklch(84% 0.099 259.6)",
+          "oklch(95% 0.099 259.6)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "chart-bar": {
+        "role": "primary",
+        "displayName": "chart-bar",
+        "tonalRamp": [
+          "oklch(15% 0.055 264.7)",
+          "oklch(27% 0.055 264.7)",
+          "oklch(38% 0.055 264.7)",
+          "oklch(49% 0.055 264.7)",
+          "oklch(61% 0.055 264.7)",
+          "oklch(72% 0.055 264.7)",
+          "oklch(84% 0.055 264.7)",
+          "oklch(95% 0.055 264.7)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "wechat-soft": {
+        "role": "semantic",
+        "displayName": "wechat-soft",
+        "tonalRamp": [
+          "oklch(15% 0.016 166.7)",
+          "oklch(27% 0.016 166.7)",
+          "oklch(38% 0.016 166.7)",
+          "oklch(49% 0.016 166.7)",
+          "oklch(61% 0.016 166.7)",
+          "oklch(72% 0.016 166.7)",
+          "oklch(84% 0.016 166.7)",
+          "oklch(95% 0.016 166.7)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "error": {
+        "role": "semantic",
+        "displayName": "error",
+        "tonalRamp": [
+          "oklch(15% 0.152 22.8)",
+          "oklch(27% 0.152 22.8)",
+          "oklch(38% 0.152 22.8)",
+          "oklch(49% 0.152 22.8)",
+          "oklch(61% 0.152 22.8)",
+          "oklch(72% 0.152 22.8)",
+          "oklch(84% 0.152 22.8)",
+          "oklch(95% 0.152 22.8)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "q0-line": {
+        "role": "semantic",
+        "displayName": "q0-line",
+        "tonalRamp": [
+          "oklch(15% 0.022 21.0)",
+          "oklch(27% 0.022 21.0)",
+          "oklch(38% 0.022 21.0)",
+          "oklch(49% 0.022 21.0)",
+          "oklch(61% 0.022 21.0)",
+          "oklch(72% 0.022 21.0)",
+          "oklch(84% 0.022 21.0)",
+          "oklch(95% 0.022 21.0)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "q0-ink": {
+        "role": "semantic",
+        "displayName": "q0-ink",
+        "tonalRamp": [
+          "oklch(15% 0.130 20.6)",
+          "oklch(27% 0.130 20.6)",
+          "oklch(38% 0.130 20.6)",
+          "oklch(49% 0.130 20.6)",
+          "oklch(61% 0.130 20.6)",
+          "oklch(72% 0.130 20.6)",
+          "oklch(84% 0.130 20.6)",
+          "oklch(95% 0.130 20.6)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "q1-line": {
+        "role": "semantic",
+        "displayName": "q1-line",
+        "tonalRamp": [
+          "oklch(15% 0.029 264.4)",
+          "oklch(27% 0.029 264.4)",
+          "oklch(38% 0.029 264.4)",
+          "oklch(49% 0.029 264.4)",
+          "oklch(61% 0.029 264.4)",
+          "oklch(72% 0.029 264.4)",
+          "oklch(84% 0.029 264.4)",
+          "oklch(95% 0.029 264.4)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "q1-ink": {
+        "role": "semantic",
+        "displayName": "q1-ink",
+        "tonalRamp": [
+          "oklch(15% 0.188 262.5)",
+          "oklch(27% 0.188 262.5)",
+          "oklch(38% 0.188 262.5)",
+          "oklch(49% 0.188 262.5)",
+          "oklch(61% 0.188 262.5)",
+          "oklch(72% 0.188 262.5)",
+          "oklch(84% 0.188 262.5)",
+          "oklch(95% 0.188 262.5)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "q2-line": {
+        "role": "semantic",
+        "displayName": "q2-line",
+        "tonalRamp": [
+          "oklch(15% 0.038 86.9)",
+          "oklch(27% 0.038 86.9)",
+          "oklch(38% 0.038 86.9)",
+          "oklch(49% 0.038 86.9)",
+          "oklch(61% 0.038 86.9)",
+          "oklch(72% 0.038 86.9)",
+          "oklch(84% 0.038 86.9)",
+          "oklch(95% 0.038 86.9)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "q2-ink": {
+        "role": "semantic",
+        "displayName": "q2-ink",
+        "tonalRamp": [
+          "oklch(15% 0.105 81.3)",
+          "oklch(27% 0.105 81.3)",
+          "oklch(38% 0.105 81.3)",
+          "oklch(49% 0.105 81.3)",
+          "oklch(61% 0.105 81.3)",
+          "oklch(72% 0.105 81.3)",
+          "oklch(84% 0.105 81.3)",
+          "oklch(95% 0.105 81.3)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "q3-line": {
+        "role": "semantic",
+        "displayName": "q3-line",
+        "tonalRamp": [
+          "oklch(15% 0.009 258.3)",
+          "oklch(27% 0.009 258.3)",
+          "oklch(38% 0.009 258.3)",
+          "oklch(49% 0.009 258.3)",
+          "oklch(61% 0.009 258.3)",
+          "oklch(72% 0.009 258.3)",
+          "oklch(84% 0.009 258.3)",
+          "oklch(95% 0.009 258.3)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "q3-ink": {
+        "role": "semantic",
+        "displayName": "q3-ink",
+        "tonalRamp": [
+          "oklch(15% 0.039 257.9)",
+          "oklch(27% 0.039 257.9)",
+          "oklch(38% 0.039 257.9)",
+          "oklch(49% 0.039 257.9)",
+          "oklch(61% 0.039 257.9)",
+          "oklch(72% 0.039 257.9)",
+          "oklch(84% 0.039 257.9)",
+          "oklch(95% 0.039 257.9)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "completed-ink": {
+        "role": "semantic",
+        "displayName": "completed-ink",
+        "tonalRamp": [
+          "oklch(15% 0.029 259.0)",
+          "oklch(27% 0.029 259.0)",
+          "oklch(38% 0.029 259.0)",
+          "oklch(49% 0.029 259.0)",
+          "oklch(61% 0.029 259.0)",
+          "oklch(72% 0.029 259.0)",
+          "oklch(84% 0.029 259.0)",
+          "oklch(95% 0.029 259.0)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "completed-check": {
+        "role": "semantic",
+        "displayName": "completed-check",
+        "tonalRamp": [
+          "oklch(15% 0.033 258.9)",
+          "oklch(27% 0.033 258.9)",
+          "oklch(38% 0.033 258.9)",
+          "oklch(49% 0.033 258.9)",
+          "oklch(61% 0.033 258.9)",
+          "oklch(72% 0.033 258.9)",
+          "oklch(84% 0.033 258.9)",
+          "oklch(95% 0.033 258.9)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "drop-target": {
+        "role": "semantic",
+        "displayName": "drop-target",
+        "tonalRamp": [
+          "oklch(15% 0.036 262.8)",
+          "oklch(27% 0.036 262.8)",
+          "oklch(38% 0.036 262.8)",
+          "oklch(49% 0.036 262.8)",
+          "oklch(61% 0.036 262.8)",
+          "oklch(72% 0.036 262.8)",
+          "oklch(84% 0.036 262.8)",
+          "oklch(95% 0.036 262.8)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      },
+      "toast": {
+        "role": "neutral",
+        "displayName": "toast",
+        "tonalRamp": [
+          "oklch(15% 0.048 258.3)",
+          "oklch(27% 0.048 258.3)",
+          "oklch(38% 0.048 258.3)",
+          "oklch(49% 0.048 258.3)",
+          "oklch(61% 0.048 258.3)",
+          "oklch(72% 0.048 258.3)",
+          "oklch(84% 0.048 258.3)",
+          "oklch(95% 0.048 258.3)"
+        ],
+        "note": "合成OKLCH面板预览色阶 保持源码色相与彩度 不替代frontmatter规范值 高彩度端点可能由显示器裁切"
+      }
+    },
+    "typographyMeta": {
+      "body": {
+        "displayName": "系统正文",
+        "purpose": "系统字体栈 所有网页文字继承"
+      },
+      "headline": {
+        "displayName": "当前页名",
+        "purpose": "页头 title"
+      },
+      "summary": {
+        "displayName": "月总额",
+        "purpose": "紧凑总額 数字等宽"
+      },
+      "caption": {
+        "displayName": "次要信息",
+        "purpose": "非主要任务正文"
+      },
+      "quadrant-mark": {
+        "displayName": "任务单字",
+        "purpose": "方格中心识别"
+      }
+    },
+    "shadows": [
+      {
+        "name": "card",
+        "value": "0 3px 10px #1c345405",
+        "purpose": "白色功能卡片与事项清单"
+      },
+      {
+        "name": "segmented",
+        "value": "0 2px 4px #1833560b",
+        "purpose": "分段控件选中块"
+      },
+      {
+        "name": "bottom-nav",
+        "value": "0 -5px 17px #1c355006",
+        "purpose": "固定导航"
+      },
+      {
+        "name": "dialog",
+        "value": "0 20px 80px #172e4733",
+        "purpose": "模态弹层"
+      },
+      {
+        "name": "toast",
+        "value": "0 8px 18px #20385920",
+        "purpose": "短反馈"
+      },
+      {
+        "name": "filled-cell",
+        "value": "0 2px 3px #20355105",
+        "purpose": "已有事项格"
+      },
+      {
+        "name": "drag-ghost",
+        "value": "0 10px 20px #162e4e26",
+        "purpose": "拖动字标"
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(.16,1,.3,1)",
+        "purpose": "--ease"
+      },
+      {
+        "name": "button-state",
+        "value": "160ms; active scale(.96)",
+        "purpose": "按钮颜色 缩放 阴影过渡"
+      },
+      {
+        "name": "segmented-slide",
+        "value": "260ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "白色选中块 translateX(100%)"
+      },
+      {
+        "name": "nav-slide",
+        "value": "280ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "选中图标底块根据实际列宽平移"
+      },
+      {
+        "name": "page-in",
+        "value": "220ms cubic-bezier(.16,1,.3,1); opacity .4 → 1",
+        "purpose": "仅切页时淡入 不位移清单"
+      },
+      {
+        "name": "row-reorder",
+        "value": "250ms cubic-bezier(.16,1,.3,1); previousTop-currentTop → 0",
+        "purpose": "相同data-motion-id已存在行的FLIP重排 位移1–900px之间"
+      },
+      {
+        "name": "bar-in",
+        "value": "400ms cubic-bezier(.16,1,.3,1); scaleY(.2) → scaleY(1)",
+        "purpose": "柱形从底部进入"
+      },
+      {
+        "name": "monthly-summary-reveal",
+        "value": "grid-template-rows 0fr → 1fr 260ms; opacity 0 → 1 180ms; cubic-bezier(.16,1,.3,1)",
+        "purpose": "月支出汇总展开收起 沿用系统减少动画规则 不自动滚动"
+      },
+      {
+        "name": "monthly-summary-chevron",
+        "value": "rotate(90deg) → rotate(270deg) 260ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "标题箭头同步月支出汇总的展开状态 沿用系统减少动画规则"
+      },
+      {
+        "name": "dialog-in",
+        "value": "240ms cubic-bezier(.16,1,.3,1); opacity .4/translateY(18px)/scale(.985) → 1/0/1",
+        "purpose": "弹层进入"
+      },
+      {
+        "name": "dialog-out",
+        "value": "170ms ease; opacity → 0; translateY(14px); scale(.985)",
+        "purpose": "LedgerUI.close路径退出 部分保存路径直接dialog.close"
+      },
+      {
+        "name": "backdrop",
+        "value": "enter 160ms ease opacity .25 → 1; exit170ms ease opacity → 0",
+        "purpose": "弹层遮罩"
+      },
+      {
+        "name": "toast",
+        "value": "enter220ms cubic-bezier(.16,1,.3,1); exit160ms ease; opacity and translate6px",
+        "purpose": "toast停留3500ms"
+      },
+      {
+        "name": "shared-container",
+        "value": "group280ms cubic-bezier(.16,1,.3,1); root220ms",
+        "purpose": "日期或柱子展开有View Transition支持时共享detail-focus 不支持时降级"
+      },
+      {
+        "name": "reduce-motion",
+        "value": "CSS animation/transition 1ms; view-transition none; WAAPI skipped",
+        "purpose": "系统prefers-reduced-motion或html.reduce-motion"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide",
+        "value": "min-width:700px"
+      },
+      {
+        "name": "mobile",
+        "value": "max-width:700px"
+      },
+      {
+        "name": "narrow",
+        "value": "max-width:360px"
+      }
+    ],
+    "sources": [
+      "app/src/main/assets/style.css",
+      "app/src/main/assets/ui.js",
+      "app/src/main/assets/icons.js",
+      "app/src/main/assets/index.html",
+      "app/src/main/assets/app.js",
+      "app/src/main/java/cn/dailyledger/app/MainActivity.java",
+      "app/src/main/java/cn/dailyledger/app/QuadrantIconRenderer.java",
+      "app/src/main/java/cn/dailyledger/app/BillScanService.java",
+      "app/src/main/res/values/styles.xml",
+      "app/src/main/res/values-v27/styles.xml",
+      "app/src/main/res/drawable/ic_launcher.xml",
+      "app/src/main/res/drawable/ic_grip.xml",
+      "app/src/main/res/drawable/ic_close.xml"
+    ],
+    "native": {
+      "theme": {
+        "fontFamily": "sans",
+        "accentRef": "colors.primary",
+        "statusBar": "white + light-status-bar",
+        "navigationBar": "API26 ink; API27+ white + light-navigation-bar"
+      },
+      "textZoom": {
+        "unit": "percent",
+        "min": 85,
+        "max": 200,
+        "source": "system configuration.fontScale"
+      },
+      "scanbar": {
+        "unit": "dp",
+        "width": 192,
+        "height": 48,
+        "controls": 4,
+        "controlSize": 48,
+        "backgroundArgb": "0xfaffffff",
+        "borderArgb": "0xffccdafa",
+        "borderWidth": 1,
+        "radius": 20,
+        "elevation": 4,
+        "textSizeSp": 13,
+        "initialPosition": [
+          10,
+          130
+        ],
+        "iconStroke": 1.8,
+        "gripPadding": [
+          13,
+          12,
+          13,
+          12
+        ],
+        "closePadding": [
+          15,
+          15,
+          15,
+          15
+        ]
+      },
+      "quadrantIcon": {
+        "unit": "bitmap px",
+        "canvasSize": 192,
+        "clipRadius": 44,
+        "tileSize": 81,
+        "tileStep": 87,
+        "outerPadding": 12,
+        "tileRadius": 6,
+        "smallCellSize": 36,
+        "smallCellStep": 39,
+        "smallCellRadius": 3,
+        "singleMarkSize": 59,
+        "multiMarkSize": 30,
+        "overflowMarkSize": 18,
+        "fontFamily": "sans-serif-medium",
+        "inkRef": "colors.ink",
+        "quadrantColorRefs": [
+          "colors.q0-bg",
+          "colors.q1-bg",
+          "colors.q2-bg",
+          "colors.q3-bg"
+        ],
+        "emptyTileRef": "colors.day-empty"
+      },
+      "iconLicense": "Bundled Lucide ISC; app/src/main/assets/lucide-LICENSE.txt"
+    },
+    "interaction": {
+      "webUnit": "CSS px",
+      "completionTarget": [
+        48,
+        48
+      ],
+      "dragTarget": [
+        48,
+        48
+      ],
+      "calendarAndQuadrant": "aspect-ratio:1; unchanged responsive grid geometry",
+      "dragThreshold": 7,
+      "postDragClickSuppressionMs": 400,
+      "taskTrayMaxHeights": {
+        "base": 240,
+        "mobile": 224,
+        "narrow": 212
+      },
+      "focusRing": "3px #719af2; offset3px",
+      "disabledOpacity": 0.4,
+      "chartModeSwitch": {
+        "source": "app/src/main/assets/app.js: switchChartMode; app/src/main/assets/style.css",
+        "behavior": "原位更新标题 图表 说明与分段状态 保留日历和分段按钮 DOM 恢复原页面滚动坐标",
+        "plotHeight": { "base": 216, "max700px": 208 },
+        "headingMinHeight": "2.7em",
+        "headingLineHeight": 1.35,
+        "labelsMinHeight": 50,
+        "noteMinHeight": "3.4em"
+      },
+      "monthlySummary": {
+        "source": "app/src/main/assets/app.js: monthlySummary / toggleMonthlySummary; app/src/main/assets/style.css",
+        "placement": "周总与月总图表下方均保留",
+        "defaultOpen": false,
+        "collapsedContent": "仅标题与箭头 不显示全年总额",
+        "expandedMonthCount": 12,
+        "preserveStateAcrossChartModes": true,
+        "autoScroll": false,
+        "toggleMinHeight": 48,
+        "toggleSemantics": "aria-expanded 与 aria-controls",
+        "collapsedSemantics": "内容 inert / aria-hidden=true 月份按钮 tabindex=-1 展开恢复"
+      }
+    },
+    "verification": {
+      "version": "1.7.1",
+      "updatedAt": "2026-10-13",
+      "delivery": "local production APK; user requested no upload",
+      "evidenceDirectory": ".tools/v171-review",
+      "verifiedContext": "Chrome actual production assets at 390px and 320px; tap geometry and monthly-summary expand/collapse passed",
+      "automatedChecks": "npm tests 11; Java tests 192; drag checks and build passed",
+      "previousEvidence": {
+        "version": "1.7.0",
+        "evidenceDirectory": ".tools/v170-review",
+        "verifiedContext": "MuMu Android15 APK screenshots use independent synthetic fixture"
+      },
+      "notVerified": [
+        "1.7.1 Android emulator validation; emulator unavailable",
+        "Realme GT7 Pro",
+        "live payment-app OCR",
+        "pinned launcher icon actual refresh"
+      ],
+      "status": "Describes current source; Chrome checks and previous APK evidence do not establish native validation for this fix"
+    }
+  },
+  "components": [
+    {
+      "name": "主要按钮",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "正式保存与核对行动，最小高度48px。",
+      "html": "<button class=\"ds-control ds-primary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg>保存支出</button>",
+      "css": ".ds-primary{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:48px;padding:12px 17px;border:0;border-radius:10px;font-size:14px;font-weight:600;background:var(--primary,#235ee8);color:white}.ds-primary:hover{background:var(--primary-dark,#1745b5)}.ds-control{transition:background-color 160ms,color 160ms,transform 160ms cubic-bezier(.16,1,.3,1),box-shadow 160ms;cursor:pointer;touch-action:manipulation}.ds-control:active{transform:scale(.96)}.ds-control:disabled{opacity:.4;cursor:default;transform:none}.ds-control:focus-visible{outline:3px solid #719af2;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-control{transition-duration:1ms!important}}"
+    },
+    {
+      "name": "次要按钮",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "导出、编辑或取消等次行动。",
+      "html": "<button class=\"ds-control ds-secondary\">导出备份</button>",
+      "css": ".ds-secondary{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:48px;padding:12px 17px;border:0;border-radius:10px;font-size:14px;font-weight:600;background:var(--soft,#edf3ff);color:#2554b6}.ds-secondary:hover{background:#dce8ff}.ds-control{transition:background-color 160ms,color 160ms,transform 160ms cubic-bezier(.16,1,.3,1),box-shadow 160ms;cursor:pointer;touch-action:manipulation}.ds-control:active{transform:scale(.96)}.ds-control:disabled{opacity:.4;cursor:default;transform:none}.ds-control:focus-visible{outline:3px solid #719af2;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-control{transition-duration:1ms!important}}"
+    },
+    {
+      "name": "普通输入",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "商户与备注输入，聚焦时蓝色边框和可见轮廓。",
+      "html": "<label class=\"ds-field-label\" for=\"ds-note\">商户 / 备注</label><input class=\"ds-field\" id=\"ds-note\" placeholder=\"例如 午餐\" />",
+      "css": ".ds-field-label{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;display:block;font-size:13px;color:#53647b;line-height:1.6}.ds-field{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;display:block;width:100%;min-width:0;min-height:48px;margin-top:6px;padding:11px 12px;border:1px solid #ccd4df;border-radius:10px;background:white;color:var(--ink,#17212f);transition:border-color 160ms,box-shadow 160ms}.ds-field::placeholder{color:#6b7789}.ds-field:hover,.ds-field:focus{border-color:var(--primary,#235ee8)}.ds-field:focus-visible{outline:3px solid #719af2;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-field{transition-duration:1ms}}"
+    },
+    {
+      "name": "底部导航",
+      "kind": "nav",
+      "refersTo": "bottom-nav",
+      "description": "三个固定入口，当前账单页的浅蓝指示块仅位于图标背后。",
+      "html": "<nav class=\"ds-nav\" aria-label=\"主导航\"><button class=\"ds-control\"><span><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4\"/><path d=\"M2 6h4\"/><path d=\"M2 10h4\"/><path d=\"M2 14h4\"/><path d=\"M2 18h4\"/><path d=\"M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z\"/></svg></span>备忘录</button><button class=\"ds-control ds-nav-active\" aria-current=\"page\"><span><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8 2v4\"/><path d=\"M16 2v4\"/><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M3 10h18\"/><path d=\"M8 14h.01\"/><path d=\"M12 14h.01\"/><path d=\"M16 14h.01\"/><path d=\"M8 18h.01\"/><path d=\"M12 18h.01\"/><path d=\"M16 18h.01\"/></svg></span>账单花销</button><button class=\"ds-control\"><span><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M10 5H3\"/><path d=\"M12 19H3\"/><path d=\"M14 3v4\"/><path d=\"M16 17v4\"/><path d=\"M21 12h-9\"/><path d=\"M21 19h-5\"/><path d=\"M21 5h-7\"/><path d=\"M8 10v4\"/><path d=\"M8 12H3\"/></svg></span>设置</button></nav>",
+      "css": ".ds-nav{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;position:relative;isolation:isolate;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:white;border-top:1px solid var(--line,#e7ebf1);padding:8px 14px 9px;box-shadow:0 -5px 17px #1c355006}.ds-nav:before{content:\"\";position:absolute;z-index:-1;top:8px;left:calc(50% - 24px);width:48px;height:29px;border-radius:12px;background:var(--soft,#edf3ff);transition:transform 280ms cubic-bezier(.16,1,.3,1)}.ds-nav button{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:54px;padding:0;border-radius:10px;font-size:11px;color:var(--muted,#637084)}.ds-nav button>span{height:29px;width:48px;display:grid;place-items:center}.ds-nav .ds-nav-active{color:var(--primary,#235ee8);font-weight:600}.ds-nav button:hover{color:var(--primary,#235ee8)}.ds-control{transition:background-color 160ms,color 160ms,transform 160ms cubic-bezier(.16,1,.3,1),box-shadow 160ms;cursor:pointer;touch-action:manipulation}.ds-control:active{transform:scale(.96)}.ds-control:disabled{opacity:.4;cursor:default;transform:none}.ds-control:focus-visible{outline:3px solid #719af2;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-control{transition-duration:1ms!important}}"
+    },
+    {
+      "name": "状态标签",
+      "kind": "chip",
+      "refersTo": "pill",
+      "description": "状态展示，非交互控件。",
+      "html": "<span class=\"ds-pill\">3 笔待核对</span>",
+      "css": ".ds-pill{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;display:inline-block;padding:5px 8px;border-radius:6px;background:var(--soft,#edf3ff);color:#315bba;font-size:11px;white-space:nowrap}"
+    },
+    {
+      "name": "白色功能卡片",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "功能模块的浅边、低阴影表面；示例是原卡片结构的静态样本。",
+      "html": "<section class=\"ds-card\"><div class=\"ds-card-heading\"><h2>消费日历</h2><span>点日期看明细</span></div><p>金额单位 元 · 蓝色边框为今天</p></section>",
+      "css": ".ds-card{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;background:white;color:var(--ink,#17212f);border:1px solid #e9edf4;border-radius:17px;padding:19px;box-shadow:0 3px 10px #1c345405}.ds-card-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}.ds-card h2{margin:0;font-size:17px;font-weight:650}.ds-card-heading span,.ds-card p{margin:0;font-size:11px;color:var(--muted,#637084);line-height:1.7}@media(max-width:700px){.ds-card{padding:16px 14px}.ds-card h2{font-size:16px}}@media(max-width:360px){.ds-card{padding:14px 11px}}"
+    },
+    {
+      "name": "蓝色月总额",
+      "kind": "card",
+      "refersTo": "summary-card",
+      "description": "总额、日均和消费笔数；金额是组件展示样例。",
+      "html": "<section class=\"ds-summary\"><span class=\"ds-summary-label\">10月总花销</span><div class=\"ds-summary-value\"><span>¥</span>1280.00</div><div class=\"ds-summary-meta\"><span>日均 ¥106.67</span><span>12笔消费 · 8天有支出</span></div></section>",
+      "css": ".ds-summary{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;background:var(--primary,#235ee8);color:white;border-radius:18px;padding:20px;font-variant-numeric:tabular-nums}.ds-summary-label{display:block;font-size:13px;color:#e1eaff;margin-bottom:7px}.ds-summary-value{font-size:40px;font-weight:650;line-height:1.25;letter-spacing:-.025em;white-space:nowrap}.ds-summary-value>span{font-size:22px;font-weight:450;margin-right:5px}.ds-summary-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;font-size:11px;color:#e1eaff;line-height:1.6}@media(min-width:700px){.ds-summary{padding:25px}.ds-summary-value{font-size:44px}}@media(max-width:700px){.ds-summary{padding:18px}.ds-summary-value{font-size:38px}}@media(max-width:360px){.ds-summary{padding:16px}.ds-summary-value{font-size:35px}.ds-summary-meta{flex-wrap:wrap;font-size:10px}}"
+    },
+    {
+      "name": "日期方块",
+      "kind": "custom",
+      "refersTo": "calendar-day",
+      "description": "静态展示今日有支出状态，正方形尺寸由七列网格决定。",
+      "html": "<div class=\"ds-calendar\"><button class=\"ds-control ds-day\" aria-label=\"10月12日 支出128元 查看明细\"><span class=\"ds-number\">12</span><span class=\"ds-spent\">128.00</span></button></div>",
+      "css": ".ds-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;width:100%}.ds-day{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;aspect-ratio:1;min-width:0;padding:0;border:1px solid var(--primary,#235ee8);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:white;color:var(--ink,#17212f);position:relative;overflow:hidden}.ds-day:after{content:\"\";position:absolute;top:4px;right:4px;width:3px;height:3px;border-radius:50%;background:var(--primary,#235ee8)}.ds-number{font-size:13px;font-weight:600;line-height:1.1}.ds-spent{width:100%;font-size:12px;line-height:1.2;color:#34568d;white-space:nowrap;text-align:center}.ds-day:hover{background:#cddfff}.ds-control{transition:background-color 160ms,color 160ms,transform 160ms cubic-bezier(.16,1,.3,1),box-shadow 160ms;cursor:pointer;touch-action:manipulation}.ds-control:active{transform:scale(.96)}.ds-control:disabled{opacity:.4;cursor:default;transform:none}.ds-control:focus-visible{outline:3px solid #719af2;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-control{transition-duration:1ms!important}}"
+    },
+    {
+      "name": "四象限单区",
+      "kind": "custom",
+      "description": "重要且紧急区，九个方格；保留实际虚线空格、白色实心字标。",
+      "html": "<section class=\"ds-quadrant\"><h3>重要且紧急<small>1/9</small></h3><div class=\"ds-qgrid\"><button class=\"ds-control ds-qcell ds-filled\" aria-label=\"重要且紧急 第一格 买药\"><strong>药</strong></button><button class=\"ds-control ds-qcell\" aria-label=\"重要且紧急 第2格 空格 添加事项\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></button><button class=\"ds-control ds-qcell\" aria-label=\"重要且紧急 第3格 空格 添加事项\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></button><button class=\"ds-control ds-qcell\" aria-label=\"重要且紧急 第4格 空格 添加事项\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></button><button class=\"ds-control ds-qcell\" aria-label=\"重要且紧急 第5格 空格 添加事项\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></button><button class=\"ds-control ds-qcell\" aria-label=\"重要且紧急 第6格 空格 添加事项\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></button><button class=\"ds-control ds-qcell\" aria-label=\"重要且紧急 第7格 空格 添加事项\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></button><button class=\"ds-control ds-qcell\" aria-label=\"重要且紧急 第8格 空格 添加事项\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></button><button class=\"ds-control ds-qcell\" aria-label=\"重要且紧急 第9格 空格 添加事项\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></button></div></section>",
+      "css": ".ds-quadrant{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;padding:11px 10px;border-radius:15px;background:#fff2f1;border:1px solid #f2dedd;color:#a13f43}.ds-quadrant h3{margin:0 0 9px;display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:12px}.ds-quadrant h3 small{font-size:10px;font-weight:400}.ds-qgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.ds-qcell{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;aspect-ratio:1;min-width:0;padding:0;display:flex;align-items:center;justify-content:center;flex-direction:column;border:1px dashed #f2dedd;border-radius:7px;background:#ffffff80;color:#a13f43;touch-action:none}.ds-filled{background:white;border-style:solid;box-shadow:0 2px 3px #20355105}.ds-qcell strong{font-size:23px;line-height:1.2;font-weight:600}.ds-qcell:hover{background:var(--soft,#edf3ff)}.ds-control{transition:background-color 160ms,color 160ms,transform 160ms cubic-bezier(.16,1,.3,1),box-shadow 160ms;cursor:pointer;touch-action:manipulation}.ds-control:active{transform:scale(.96)}.ds-control:disabled{opacity:.4;cursor:default;transform:none}.ds-control:focus-visible{outline:3px solid #719af2;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-control{transition-duration:1ms!important}}"
+    },
+    {
+      "name": "待办完成与拖动",
+      "kind": "custom",
+      "description": "真实48px点击区包围20px完成标记与18px拖动图标 示例显示未完成态",
+      "html": "<div class=\"ds-todo\"><button class=\"ds-control ds-check\" aria-pressed=\"false\" aria-label=\"完成 买药\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg></button><button class=\"ds-control ds-todo-text\">买药</button><button class=\"ds-control ds-drag\" aria-label=\"拖动事项\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"5\" r=\"1\"/><circle cx=\"9\" cy=\"19\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"5\" r=\"1\"/><circle cx=\"15\" cy=\"19\" r=\"1\"/></svg></button></div>",
+      "css": ".ds-todo{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;display:flex;align-items:center;gap:8px;min-height:57px;padding:7px 0;border-bottom:1px solid #eef1f5}.ds-check{width:48px;height:48px;flex:0 0 48px;padding:0;border:0;background:transparent;border-radius:9px;position:relative;display:grid;place-items:center}.ds-check:before{content:\"\";position:absolute;width:20px;height:20px;border:1.5px solid #bac4d2;border-radius:50%;background:transparent;transition:background 180ms,border-color 180ms}.ds-check svg{z-index:1;color:white;opacity:0;transition:opacity 180ms}.ds-todo-text{font-family:system-ui,\"Segoe UI\",\"Microsoft YaHei\",sans-serif;flex:1;min-width:0;padding:2px 0;border:0;background:transparent;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.65;color:var(--ink,#17212f)}.ds-drag{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border:0;border-radius:6px;background:transparent;color:#7a8aa0;padding:0;touch-action:none;user-select:none}.ds-check:hover,.ds-todo-text:hover,.ds-drag:hover{background:var(--soft,#edf3ff)}.ds-control{transition:background-color 160ms,color 160ms,transform 160ms cubic-bezier(.16,1,.3,1),box-shadow 160ms;cursor:pointer;touch-action:manipulation}.ds-control:active{transform:scale(.96)}.ds-control:disabled{opacity:.4;cursor:default;transform:none}.ds-control:focus-visible{outline:3px solid #719af2;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-control{transition-duration:1ms!important}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "经典卡片日常账本",
+    "overview": "这是用户选择的 C 经典卡片方向在正式 Android 应用中的实现：淡灰页面承托白色功能卡片，蓝色总额建立金额重点，深色文字维持清晰层级。紧凑页头与总额把空间让给日历，四象限以淡色分区呈现任务优先级。\n\n本文件从生产代码提取，适用于 `app/src/main/assets` 的本地 WebView 和配套原生表面。前置 YAML 是颜色、字体、圆角、间距及组件的规范层；`.impeccable/design.json` 保存动效、阴影、断点、原生尺寸和可独立渲染的组件样本。别名 `--green`、`--green-dark` 实际指向主蓝色，不是第二套绿色主题。\n\n截至 2026-10-13，当前为本地正式 APK 1.7.1，本轮用户要求不上传。本次图表切换与月支出汇总折叠已在 Chrome 加载生产资产、以 390px 和 320px 视口检查点击尺寸与展开收起，截图位于 `.tools/v171-review`；npm 测试 11 项、Java 测试 192 项、拖动检查与构建通过。1.7.0 的 MuMu Android 15 APK 独立样例截图保留在 `.tools/v170-review`，属于上一版证据。本次 Android 模拟器不可用，真我 GT7 Pro、支付软件现场 OCR、已固定桌面快捷图标的真实刷新尚未验证。本文件描述源码事实，不将浏览器验证或上一版模拟器证据标为本次原生验证。",
+    "keyCharacteristics": [
+      "白色功能表面、淡灰页面、蓝色金额重点",
+      "系统字体、等宽数字、捆绑 Lucide 线性图标",
+      "圆角卡片和方形日期、直角柱状图",
+      "状态过渡保持滚动位置与任务身份",
+      "保留真实本地账本接口及日期核对规则"
+    ],
+    "rules": [
+      {
+        "name": "语义色",
+        "body": "绿色只标识微信，红黄灰只承担明确状态；新增普通操作沿用主蓝。",
+        "section": "colors"
+      },
+      {
+        "name": "连续位置",
+        "body": "同页任务重绘必须保留原顺序、清单滚动和页面滚动；不能用整个列表平移作为页面入场效果。",
+        "section": "layout"
+      }
+    ],
+    "dos": [
+      "**Do** 从生产资产与原生资源同步提取 token，保留白黑蓝经典卡片方向。",
+      "**Do** 保留系统字体、数字对齐、图标文字标签、系统减少动画和文本缩放。",
+      "**Do** 保留七列日期、十二列年统计、36 格四象限和任务滚动位置。",
+      "**Do** 让完成与拖动控件保持 48×48px，原生扫描控件保持 48×48dp。",
+      "**Do** 保留日期核对、真实本地数据接口和账单统计规则。"
+    ],
+    "donts": [
+      "**Don't** 使用 emoji、远程图标字体或新增未授权视觉主题。",
+      "**Don't** 将日历与四象限格子改为固定 48px 而破坏手机布局。",
+      "**Don't** 给统计柱子添加圆角，或以整页位移动画重置清单位置。",
+      "**Don't** 把正式 APK 写成模拟数据 demo，或把模拟器样例当作真机、现场 OCR、桌面刷新验证。",
+      "**Don't** 将当前源码未覆盖的动效路径或未验证的设备能力写成已完成事实。"
+    ]
+  }
+}

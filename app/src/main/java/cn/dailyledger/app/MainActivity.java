@@ -35,18 +35,19 @@ public final class MainActivity extends Activity {
         container.setOnApplyWindowInsetsListener((v,insets)->{v.setPadding(insets.getSystemWindowInsetLeft(),insets.getSystemWindowInsetTop(),insets.getSystemWindowInsetRight(),insets.getSystemWindowInsetBottom());return insets.consumeSystemWindowInsets();});
         // JavaScript is required by our bundled UI. All requests are allowlisted below;
         // external navigation, arbitrary files and network access are unavailable.
-        web.setBackgroundColor(0xfff4f7f8);web.getSettings().setJavaScriptEnabled(true);web.getSettings().setDomStorageEnabled(false);
+        web.setBackgroundColor(0xfff4f6fb);web.getSettings().setJavaScriptEnabled(true);web.getSettings().setDomStorageEnabled(false);
+        web.getSettings().setTextZoom(Math.max(85,Math.min(200,Math.round(getResources().getConfiguration().fontScale*100f))));
         web.getSettings().setAllowFileAccess(false);web.getSettings().setAllowContentAccess(false);
         web.getSettings().setAllowFileAccessFromFileURLs(false);web.getSettings().setAllowUniversalAccessFromFileURLs(false);
         web.setWebChromeClient(new WebChromeClient());
         web.setWebViewClient(new WebViewClient(){
-            @Override public void onPageFinished(WebView view,String url){handleEntryIntent();}
+            @Override public void onPageFinished(WebView view,String url){syncMotionPreference();handleEntryIntent();}
             @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest request){return true;}
             @Override public WebResourceResponse shouldInterceptRequest(WebView view,WebResourceRequest request){
                 String url=request.getUrl().toString(),prefix="https://ledger.local/";
                 if(url.startsWith(prefix)){
                     String name=url.substring(prefix.length());if(name.isEmpty())name="index.html";
-                    if(Arrays.asList("index.html","style.css","core.js","app.js").contains(name)){
+                    if(Arrays.asList("index.html","style.css","core.js","icons.js","ui.js","app.js").contains(name)){
                         try{return new WebResourceResponse(name.endsWith(".css")?"text/css":name.endsWith(".js")?"application/javascript":"text/html","UTF-8",getAssets().open(name));}catch(Exception ignored){}
                     }
                 }
@@ -55,8 +56,12 @@ public final class MainActivity extends Activity {
         });
         web.addJavascriptInterface(new Bridge(),"AndroidLedger");
         web.loadUrl("https://ledger.local/index.html");
+        if(Build.VERSION.SDK_INT>=33)getOnBackInvokedDispatcher().registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,this::handleBack);
     }
-    @Override protected void onResume(){super.onResume();DesktopShortcut.refreshAsync(this,false);if(web!=null)web.evaluateJavascript("window.refreshLedger && window.refreshLedger()",null);}
+    private void syncMotionPreference(){if(web!=null){boolean reduced=Settings.Global.getFloat(getContentResolver(),Settings.Global.ANIMATOR_DURATION_SCALE,1f)==0f;web.evaluateJavascript("window.setNativeReduceMotion && window.setNativeReduceMotion("+reduced+")",null);}}
+    private void handleBack(){if(web==null){finish();return;}web.evaluateJavascript("window.handleBack ? window.handleBack() : false",value->{if(!"true".equals(value))finish();});}
+    @Override public void onBackPressed(){handleBack();}
+    @Override protected void onResume(){super.onResume();DesktopShortcut.refreshAsync(this,false);syncMotionPreference();if(web!=null)web.evaluateJavascript("window.refreshLedger && window.refreshLedger()",null);}
     @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);pendingLauncherEntry=isLauncherIntent(intent);handleEntryIntent();}
     private static boolean isLauncherIntent(Intent intent){return intent!=null&&(DesktopShortcut.ACTION_OPEN.equals(intent.getAction())||(Intent.ACTION_MAIN.equals(intent.getAction())&&intent.hasCategory(Intent.CATEGORY_LAUNCHER)));}
     private void handleEntryIntent(){
