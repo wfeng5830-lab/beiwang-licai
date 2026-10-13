@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-12T13:20:42.996Z",
+  "generatedAt": "2026-10-13T00:17:51.1225637Z",
   "title": "Design System: 日常账本",
   "extensions": {
     "colorMeta": {
@@ -686,6 +686,16 @@
         "purpose": "柱形从底部进入"
       },
       {
+        "name": "monthly-summary-reveal",
+        "value": "grid-template-rows 0fr → 1fr 260ms; opacity 0 → 1 180ms; cubic-bezier(.16,1,.3,1)",
+        "purpose": "月支出汇总展开收起 沿用系统减少动画规则 不自动滚动"
+      },
+      {
+        "name": "monthly-summary-chevron",
+        "value": "rotate(90deg) → rotate(270deg) 260ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "标题箭头同步月支出汇总的展开状态 沿用系统减少动画规则"
+      },
+      {
         "name": "dialog-in",
         "value": "240ms cubic-bezier(.16,1,.3,1); opacity .4/translateY(18px)/scale(.985) → 1/0/1",
         "purpose": "弹层进入"
@@ -833,19 +843,48 @@
         "narrow": 212
       },
       "focusRing": "3px #719af2; offset3px",
-      "disabledOpacity": 0.4
+      "disabledOpacity": 0.4,
+      "chartModeSwitch": {
+        "source": "app/src/main/assets/app.js: switchChartMode; app/src/main/assets/style.css",
+        "behavior": "原位更新标题 图表 说明与分段状态 保留日历和分段按钮 DOM 恢复原页面滚动坐标",
+        "plotHeight": { "base": 216, "max700px": 208 },
+        "headingMinHeight": "2.7em",
+        "headingLineHeight": 1.35,
+        "labelsMinHeight": 50,
+        "noteMinHeight": "3.4em"
+      },
+      "monthlySummary": {
+        "source": "app/src/main/assets/app.js: monthlySummary / toggleMonthlySummary; app/src/main/assets/style.css",
+        "placement": "周总与月总图表下方均保留",
+        "defaultOpen": false,
+        "collapsedContent": "仅标题与箭头 不显示全年总额",
+        "expandedMonthCount": 12,
+        "preserveStateAcrossChartModes": true,
+        "autoScroll": false,
+        "toggleMinHeight": 48,
+        "toggleSemantics": "aria-expanded 与 aria-controls",
+        "collapsedSemantics": "内容 inert / aria-hidden=true 月份按钮 tabindex=-1 展开恢复"
+      }
     },
     "verification": {
-      "version": "1.7.0",
+      "version": "1.7.1",
+      "updatedAt": "2026-10-13",
       "delivery": "local production APK; user requested no upload",
-      "evidenceDirectory": ".tools/v170-review",
-      "verifiedContext": "MuMu Android15 APK screenshots use independent synthetic fixture",
+      "evidenceDirectory": ".tools/v171-review",
+      "verifiedContext": "Chrome actual production assets at 390px and 320px; tap geometry and monthly-summary expand/collapse passed",
+      "automatedChecks": "npm tests 11; Java tests 192; drag checks and build passed",
+      "previousEvidence": {
+        "version": "1.7.0",
+        "evidenceDirectory": ".tools/v170-review",
+        "verifiedContext": "MuMu Android15 APK screenshots use independent synthetic fixture"
+      },
       "notVerified": [
+        "1.7.1 Android emulator validation; emulator unavailable",
         "Realme GT7 Pro",
         "live payment-app OCR",
         "pinned launcher icon actual refresh"
       ],
-      "status": "Describes current source; does not expand validation claims"
+      "status": "Describes current source; Chrome checks and previous APK evidence do not establish native validation for this fix"
     }
   },
   "components": [
@@ -930,7 +969,7 @@
   ],
   "narrative": {
     "northStar": "经典卡片日常账本",
-    "overview": "这是用户选择的 C 经典卡片方向在正式 Android 应用中的实现：淡灰页面承托白色功能卡片，蓝色总额建立金额重点，深色文字维持清晰层级。紧凑页头与总额把空间让给日历，四象限以淡色分区呈现任务优先级。\n\n本文件从生产代码提取，适用于 `app/src/main/assets` 的本地 WebView 和配套原生表面。前置 YAML 是颜色、字体、圆角、间距及组件的规范层；`.impeccable/design.json` 保存动效、阴影、断点、原生尺寸和可独立渲染的组件样本。别名 `--green`、`--green-dark` 实际指向主蓝色，不是第二套绿色主题。\n\n当前为本地正式 APK 1.7.0，本轮用户要求不上传。MuMu Android 15 的 APK 截图使用独立样例数据，位于 `.tools/v170-review`；它们属于验证证据。真我 GT7 Pro、支付软件现场 OCR、已固定桌面快捷图标的真实刷新尚未验证。本文件描述源码事实，不将这些能力标为通过验证。",
+    "overview": "这是用户选择的 C 经典卡片方向在正式 Android 应用中的实现：淡灰页面承托白色功能卡片，蓝色总额建立金额重点，深色文字维持清晰层级。紧凑页头与总额把空间让给日历，四象限以淡色分区呈现任务优先级。\n\n本文件从生产代码提取，适用于 `app/src/main/assets` 的本地 WebView 和配套原生表面。前置 YAML 是颜色、字体、圆角、间距及组件的规范层；`.impeccable/design.json` 保存动效、阴影、断点、原生尺寸和可独立渲染的组件样本。别名 `--green`、`--green-dark` 实际指向主蓝色，不是第二套绿色主题。\n\n截至 2026-10-13，当前为本地正式 APK 1.7.1，本轮用户要求不上传。本次图表切换与月支出汇总折叠已在 Chrome 加载生产资产、以 390px 和 320px 视口检查点击尺寸与展开收起，截图位于 `.tools/v171-review`；npm 测试 11 项、Java 测试 192 项、拖动检查与构建通过。1.7.0 的 MuMu Android 15 APK 独立样例截图保留在 `.tools/v170-review`，属于上一版证据。本次 Android 模拟器不可用，真我 GT7 Pro、支付软件现场 OCR、已固定桌面快捷图标的真实刷新尚未验证。本文件描述源码事实，不将浏览器验证或上一版模拟器证据标为本次原生验证。",
     "keyCharacteristics": [
       "白色功能表面、淡灰页面、蓝色金额重点",
       "系统字体、等宽数字、捆绑 Lucide 线性图标",

@@ -2,7 +2,7 @@
 const C = LedgerCore, $ = id => document.getElementById(id);
 const channels = {wechat:'微信支付',alipay:'支付宝',other:'其他'};
 const native = typeof AndroidLedger !== 'undefined';
-let page='calendar', month=C.dateKey(new Date()).slice(0,7), chartMode='week', selectedDate=C.dateKey(new Date());
+let page='calendar', month=C.dateKey(new Date()).slice(0,7), chartMode='week', monthlyOpen=false, selectedDate=C.dateKey(new Date());
 let state={entries:[],pending:[],memos:[]}, storageError='', confirmAction=null, candidateEditing=null, editingSourceKey;
 const escapeHTML = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = cents => C.money(cents);
@@ -56,9 +56,35 @@ function chartHTML(items,annual=false){
   const max=Math.max(...items.map(e=>e.cents),1);
   return `<div class="chart-scroller"><div class="chart ${annual?'annual':''}" role="group" aria-label="${items.map(e=>`${e.label} ${fmt(e.cents)} 元`).join('；')}">${items.map(e=>`<button class="chart-column ${e.month===month||(!annual&&e.from<=C.dateKey(new Date())&&e.to>=C.dateKey(new Date()))?'active':''}" ${e.month?`data-month="${e.month}"`:`data-week="${e.from}"`} aria-label="${e.label}，${fmt(e.cents)} 元"><span class="bar-value">${e.cents?fmt(e.cents):'0'}</span><span class="chart-bar" style="height:${e.cents?Math.max(2,e.cents/max*(annual?116:130)):0}px"></span></button>`).join('')}</div><div class="chart-labels ${annual?'annual':''}">${items.map(e=>`<span>${e.label}${!annual?`<small>${e.range}</small>`:''}</span>`).join('')}</div></div>`;
 }
+function chartItems(){return chartMode==='week'?C.weeks(C.monthEntries(state.entries,month),month):C.annual(state.entries,month.slice(0,4));}
+function chartTitle(){return chartMode==='week'?'每周花销':month.slice(0,4)+' 年每月花销';}
+function chartNote(){return chartMode==='week'?'周一开始 跨月只计本月 点击柱子看明细':'一年十二个月 点击月份看周统计';}
+function monthlySummary(){
+ const items=C.annual(state.entries,month.slice(0,4));
+ return `<section class="card month-summary ${monthlyOpen?'is-open':''}" id="month-summary"><button class="summary-toggle wide" data-month-summary aria-expanded="${monthlyOpen}" aria-controls="month-summary-rows"><h2>月支出汇总</h2>${I('right')}</button><div class="summary-reveal"><div id="month-summary-rows" aria-hidden="${!monthlyOpen}" ${monthlyOpen?'':'inert'}>${items.map(e=>`<button class="row wide" data-month="${e.month}" ${monthlyOpen?'':'tabindex="-1"'}><span>${e.label}</span><strong>¥${fmt(e.cents)} ${I('right')}</strong></button>`).join('')}</div></div></section>`;
+}
 function statsPage(){
-  const entries=C.monthEntries(state.entries,month), items=chartMode==='week'?C.weeks(entries,month):C.annual(state.entries,month.slice(0,4));
-  return `<section class="card" id="spending-chart"><div class="section-heading"><div><h2>${chartMode==='week'?'每周花销':month.slice(0,4)+' 年每月花销'}</h2><p>金额单位 元</p></div><div class="segmented ${chartMode==='month'?'second':''}" aria-label="统计维度"><button data-mode="week" class="${chartMode==='week'?'active':''}">周总</button><button data-mode="month" class="${chartMode==='month'?'active':''}">月总</button></div></div>${chartHTML(items,chartMode==='month')}<p class="calendar-note">${chartMode==='week'?'周一开始 跨月只计本月 点击柱子看明细':'一年十二个月 点击月份看周统计'}</p></section>${chartMode==='month'?`<section class="card"><div class="section-heading"><h2>月支出汇总</h2><span class="subtle">${month.slice(0,4)} 年</span></div>${items.map(e=>`<button class="row wide" data-month="${e.month}"><span>${e.label}</span><strong>¥${fmt(e.cents)} ${I('right')}</strong></button>`).join('')}</section>`:''}`;
+ return `<section class="card" id="spending-chart"><div class="section-heading chart-heading"><div><h2>${chartTitle()}</h2><p>金额单位 元</p></div><div class="segmented ${chartMode==='month'?'second':''}" aria-label="统计维度"><button data-mode="week" aria-pressed="${chartMode==='week'}" class="${chartMode==='week'?'active':''}">周总</button><button data-mode="month" aria-pressed="${chartMode==='month'}" class="${chartMode==='month'?'active':''}">月总</button></div></div>${chartHTML(chartItems(),chartMode==='month')}<p class="calendar-note chart-note">${chartNote()}</p></section>${monthlySummary()}`;
+}
+function switchChartMode(mode){
+ if(mode===chartMode)return;
+ chartMode=mode;
+ const panel=$('spending-chart'),position={x:scrollX,y:scrollY};
+ // Update only the plot. Keeping controls and the equal-height panel in place
+ // prevents scroll anchoring or document shortening from moving the viewport.
+ panel.querySelector('h2').textContent=chartTitle();
+ panel.querySelector('.chart-scroller').outerHTML=chartHTML(chartItems(),chartMode==='month');
+ panel.querySelector('.chart-note').textContent=chartNote();
+ panel.querySelector('.segmented').classList.toggle('second',chartMode==='month');
+ panel.querySelectorAll('[data-mode]').forEach(button=>{const active=button.dataset.mode===chartMode;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
+ window.scrollTo(position.x,position.y);
+}
+function toggleMonthlySummary(){
+ monthlyOpen=!monthlyOpen;
+ const card=$('month-summary'),rows=$('month-summary-rows');
+ card.classList.toggle('is-open',monthlyOpen);card.querySelector('[data-month-summary]').setAttribute('aria-expanded',String(monthlyOpen));
+ rows.inert=!monthlyOpen;rows.setAttribute('aria-hidden',String(!monthlyOpen));
+ rows.querySelectorAll('button').forEach(button=>{if(monthlyOpen)button.removeAttribute('tabindex');else button.setAttribute('tabindex','-1');});
 }
 let memoView='matrix',pendingSlot=-1;
 const quadrantNames=['重要且紧急','重要不紧急','紧急不重要','不紧急不重要'];
@@ -99,7 +125,7 @@ function settingsPage(){
   <section class="card settings-card"><div class="section-heading"><div class="settings-title">${desktopThumbnail()}<h2>桌面四象限图标</h2></div><span class="pill">${desktop.pinned?'已添加':'未添加'}</span></div>
   ${native?`<p class="settings-copy" role="status">${escapeHTML(desktop.message)}</p>${desktop.supported||desktop.pinned?`<div class="button-row">${desktop.pinned?'<button class="secondary" id="refresh-desktop-icon">刷新图标</button>':'<button class="primary" id="add-desktop-icon">添加到桌面</button>'}</div>`:'<p class="settings-copy">当前桌面不支持添加快捷图标。</p>'}`:'<p class="settings-copy">安装安卓应用后可添加桌面快捷图标。</p>'}
   <details class="settings-help"><summary>图标使用说明</summary><p>每个象限：一件待办显示大字，多件显示四小格，按格子顺序展示前四件，多出的数量用 + 标注。全部清空后恢复默认图案。</p><p>只有“重要且紧急”象限有未完成事项，点击图标才进入四象限；其他情况打开账单花销。</p><p>首次添加需在系统弹窗确认。这是新增快捷图标，原图标保留，可手动从桌面移走，无需卸载。小应用标记、样式与刷新速度由手机桌面决定。</p></details></section>
-  <p class="settings-foot">日常账本 1.7.0 · 本机保存</p>`;
+  <p class="settings-foot">日常账本 1.7.1 · 本机保存</p>`;
 }
 function fitDayAmounts(){
   const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');if(!ctx)return;
@@ -164,7 +190,8 @@ document.addEventListener('click',e=>{
   try{
     if(b.dataset.page){page=b.dataset.page;refresh();render();window.scrollTo(0,0);}
     if(b.dataset.shift){const d=C.parseDate(month+'-01');d.setMonth(d.getMonth()+Number(b.dataset.shift));const next=C.dateKey(d).slice(0,7);if(next>='2000-01'&&next<='2099-12'){month=next;render();}}
-    if(b.dataset.mode){chartMode=b.dataset.mode;render();$('spending-chart').scrollIntoView({block:'start'});}
+    if(b.dataset.mode)switchChartMode(b.dataset.mode);
+    if(b.hasAttribute('data-month-summary'))toggleMonthlySummary();
     if(b.dataset.month){month=b.dataset.month;chartMode='week';render();$('spending-chart').scrollIntoView({block:'start'});}
     if(b.dataset.memoView){memoView=b.dataset.memoView;render();}
     if(b.hasAttribute('data-new-memo'))openMemo();
